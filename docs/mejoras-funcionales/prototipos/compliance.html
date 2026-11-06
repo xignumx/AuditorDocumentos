@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Compliance</title>
+  <link rel="stylesheet" href="proto.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <div data-header="compliance"></div>
+    <div data-page-header data-title="Compliance" data-subtitle="Defaults por tipo de documento para todos los clientes. El motor por cliente en /config no se quita."></div>
+
+    <div class="notice">
+      Rol <b>COMPLIANCE</b> — la obligatoriedad se define una vez por tipo VUCEM y aplica a todos los clientes que lo usen.
+    </div>
+
+    <div class="vucem-page-layout">
+      <div data-vucem-panel data-selected="170"></div>
+      <div class="vucem-page-main panel">
+        <p class="hint">Tipo seleccionado: <b data-vucem-label>Factura / CFDI en importación</b> · Alcance: todos los clientes</p>
+        <div class="actions" style="margin:12px 0 16px">
+          <button class="btn btn-outline" type="button">Descargar plantilla Excel</button>
+          <label class="btn btn-ghost">Cargar matriz CSV<input id="csv" type="file" accept=".csv,.xlsx" hidden /></label>
+          <button class="btn btn-primary" type="button" id="btnApply">Aplicar a catálogo</button>
+        </div>
+        <div class="notice notice-info" id="preview" hidden></div>
+        <div class="cards">
+          <div class="field-card">
+            <div class="field-card-label">Tipo pedimento</div>
+            <div class="toggles">
+              <label class="toggle-pair"><input class="switch" type="checkbox" checked /> Visible</label>
+              <label class="toggle-pair"><input class="switch" type="checkbox" /> Obligatorio</label>
+            </div>
+          </div>
+          <div class="field-card">
+            <div class="field-card-label">Proveedor</div>
+            <div class="toggles">
+              <label class="toggle-pair"><input class="switch" type="checkbox" checked /> Visible</label>
+              <label class="toggle-pair"><input class="switch" type="checkbox" checked /> Obligatorio</label>
+            </div>
+          </div>
+          <div class="field-card">
+            <div class="field-card-label">Producto/No de parte</div>
+            <div class="toggles">
+              <label class="toggle-pair"><input class="switch" type="checkbox" checked /> Visible</label>
+              <label class="toggle-pair"><input class="switch" type="checkbox" /> Obligatorio</label>
+            </div>
+          </div>
+          <div class="field-card">
+            <div class="field-card-label">Fracciones</div>
+            <div class="toggles">
+              <label class="toggle-pair"><input class="switch" type="checkbox" checked /> Visible</label>
+              <label class="toggle-pair"><input class="switch" type="checkbox" checked /> Obligatorio</label>
+            </div>
+          </div>
+          <div class="field-card">
+            <div class="field-card-label">Vigencia hasta</div>
+            <div class="toggles">
+              <label class="toggle-pair"><input class="switch" type="checkbox" checked /> Visible</label>
+              <label class="toggle-pair"><input class="switch" type="checkbox" checked /> Obligatorio</label>
+            </div>
+          </div>
+          <div class="field-card">
+            <div class="field-card-label">Factura</div>
+            <div class="toggles">
+              <label class="toggle-pair"><input class="switch" type="checkbox" checked /> Visible</label>
+              <label class="toggle-pair"><input class="switch" type="checkbox" checked /> Obligatorio</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="proto-nav.js"></script>
+  <script>
+    document.getElementById("csv").addEventListener("change", (e) => {
+      const name = e.target.files[0]?.name || "matriz.csv";
+      const box = document.getElementById("preview");
+      box.hidden = false;
+      box.textContent = "Vista previa " + name + ": 24 filas válidas, 1 tipo VUCEM inexistente (omitir), 0 clientes individuales (alcance = todos).";
+    });
+    document.getElementById("btnApply").addEventListener("click", () => {
+      alert("Prototipo: se aplicarían los defaults por tipo. /config por cliente permanece.");
+    });
+  </script>
+</body>
+</html>

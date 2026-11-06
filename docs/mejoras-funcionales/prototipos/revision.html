@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Revisión asistida</title>
+  <link rel="stylesheet" href="proto.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <div data-header="expediente"></div>
+    <div data-page-header data-title="Revisión asistida" data-subtitle="Al confirmar, el documento regresa a la bandeja del expediente. No sustituye el modal Ver/Autorizar del repositorio actual."></div>
+
+    <p class="hint">FACT_0072171.pdf · Referencia 10008872/0 · Tipo confirmado: Factura</p>
+
+    <div class="split">
+      <div class="pdf-stage" aria-label="Vista previa del PDF">
+        <div class="pdf-page">
+          <div style="padding:28px 32px;font-size:11px;color:#6e6e6e">
+            <div style="font-size:16px;font-weight:600;color:#292929">INVOICE</div>
+            <div style="margin-top:12px">Invoice No.</div>
+          </div>
+          <div class="ocr-box" style="top:86px;left:32px;width:130px;height:22px"></div>
+          <div style="position:absolute;top:88px;left:36px;font-size:12px;font-weight:600">INV-2026-0891</div>
+          <div style="position:absolute;top:140px;left:32px;font-size:11px;color:#6e6e6e">Part No. / Item</div>
+          <div class="ocr-box" style="top:158px;left:32px;width:160px;height:18px"></div>
+          <div style="position:absolute;top:160px;left:36px;font-size:12px">HP-3341-A</div>
+          <div style="position:absolute;top:200px;left:32px;font-size:11px;color:#6e6e6e">Unit Price</div>
+          <div class="ocr-box" style="top:218px;left:32px;width:90px;height:18px"></div>
+          <div style="position:absolute;top:220px;left:36px;font-size:12px">125.00</div>
+        </div>
+      </div>
+
+      <section class="panel">
+        <div class="section-title">Campos extraídos</div>
+        <p class="hint">Los marcados como sugerido vienen de sinónimo / encabezado no literal.</p>
+
+        <div class="field-row">
+          <div class="field-row-head"><span>Factura / Invoice *</span></div>
+          <input id="fInv" value="INV-2026-0891" />
+          <button class="btn btn-ghost" type="button" data-ok="fInv">Confirmar</button>
+        </div>
+        <div class="field-row">
+          <div class="field-row-head">
+            <span>Producto / No. de parte *</span>
+            <span class="tag-sugerido">Sugerido · Part No.</span>
+          </div>
+          <input id="fParte" value="HP-3341-A" />
+          <button class="btn btn-ghost" type="button" data-ok="fParte">Confirmar</button>
+        </div>
+        <div class="field-row">
+          <div class="field-row-head">
+            <span>Valor comercial *</span>
+            <span class="tag-sugerido">Sugerido · Unit Price</span>
+          </div>
+          <input id="fValor" value="125.00" />
+          <button class="btn btn-ghost" type="button" data-ok="fValor">Confirmar</button>
+        </div>
+        <div class="field-row">
+          <div class="field-row-head"><span>Vigencia hasta *</span></div>
+          <input type="date" value="2027-04-15" />
+          <button class="btn btn-ghost" type="button">Confirmar</button>
+        </div>
+        <div class="field-row">
+          <div class="field-row-head"><span>Proveedor</span></div>
+          <input value="PARKER-HANNIFIN" />
+          <button class="btn btn-ghost" type="button">Confirmar</button>
+        </div>
+
+        <div class="actions" style="margin-top:16px">
+          <a class="btn btn-ghost" href="index.html">Volver a bandeja</a>
+          <a class="btn btn-primary" href="index.html">Guardar y autorizar</a>
+        </div>
+      </section>
+    </div>
+  </div>
+  <script src="proto-nav.js"></script>
+  <script>
+    document.querySelectorAll("[data-ok]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        btn.textContent = "Confirmado";
+        btn.disabled = true;
+      });
+    });
+  </script>
+</body>
+</html>

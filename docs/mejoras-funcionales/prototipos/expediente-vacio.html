@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Expediente — sin referencia</title>
+  <link rel="stylesheet" href="proto.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <div data-header="expediente"></div>
+    <div data-page-header data-title="Expediente" data-subtitle="Estado inicial: hay que consultar una referencia antes de cargar."></div>
+    <div class="tabs">
+      <a class="tab active" href="expediente-vacio.html">Carga y bandeja</a>
+      <a class="tab" href="expediente-documentos.html">Documentos</a>
+    </div>
+    <section class="panel">
+      <div class="context-bar">
+        <div class="field">
+          <label>Referencia</label>
+          <div class="ref-row">
+            <input placeholder="10008872/0" />
+            <a class="btn btn-ghost" href="index.html">Consultar</a>
+          </div>
+        </div>
+        <div class="field"><label>Cliente</label><input readonly placeholder="Se llena al consultar" /></div>
+        <div class="field"><label>Operación</label><input readonly /></div>
+        <div class="field"><label>Cve. pedimento</label><input readonly /></div>
+      </div>
+      <p class="hint">Ingresa referencia o tráfico y pulsa Consultar (el prototipo con datos abre la bandeja de ejemplo).</p>
+    </section>
+  </div>
+  <script src="proto-nav.js"></script>
+</body>
+</html>

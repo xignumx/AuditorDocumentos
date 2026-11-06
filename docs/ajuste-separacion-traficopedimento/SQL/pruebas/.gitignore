@@ -1,0 +1,4 @@
+# Salidas locales de sqlcmd / showplan / monitor (no versionar)
+*.txt
+*.xml
+_*

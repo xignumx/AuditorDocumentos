@@ -1,0 +1,45 @@
+.page-header {
+  background: #ffffff;
+  border: 1px solid #e3e2d8;
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.page-header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-header-icon {
+  color: #292929;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f7f5;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.page-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.page-header-title {
+  font-family: "Outfit", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #292929;
+  margin: 0;
+}
+
+.page-header-subtitle {
+  font-family: "Outfit", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #6e6e6e;
+  margin: 0;
+}

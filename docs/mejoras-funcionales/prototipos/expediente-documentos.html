@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Expediente — Documentos</title>
+  <link rel="stylesheet" href="proto.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <div data-header="expediente"></div>
+    <div data-page-header data-title="Expediente" data-subtitle="Mismos documentos de la bandeja, con folio Invoice / Permiso visible."></div>
+
+    <div class="tabs">
+      <a class="tab" href="index.html">Carga y bandeja</a>
+      <a class="tab active" href="expediente-documentos.html">Documentos</a>
+    </div>
+
+    <section class="panel">
+      <p class="hint">Referencia 10008872/0 · 0324 PARKER-HANNIFIN DE MÉXICO SA DE CV (TOLUCA)</p>
+      <div class="field" style="max-width:360px;margin:12px 0 16px">
+        <label for="q">Buscar</label>
+        <input id="q" placeholder="Buscar por documento, prefijo o invoice..." />
+      </div>
+      <div class="table-wrap">
+        <table class="docs" id="grid">
+          <thead>
+            <tr>
+              <th>Documento</th>
+              <th>Prefijo</th>
+              <th>VUCEM</th>
+              <th>Vigencia</th>
+              <th>Archivo</th>
+              <th>Número de Factura / Invoice / Permiso</th>
+              <th>Clasificación</th>
+              <th>Estatus</th>
+              <th>Creación</th>
+              <th>Creado por</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Factura</td>
+              <td>1-002</td>
+              <td>170</td>
+              <td>—</td>
+              <td>FACT_0072171.pdf</td>
+              <td class="invoice">INV-2026-0891</td>
+              <td>Identificador general</td>
+              <td><span class="badge badge-leyendo">Leyendo</span></td>
+              <td>2026-10-15</td>
+              <td>asmendez</td>
+              <td class="js-actions"></td>
+            </tr>
+            <tr>
+              <td>Carta <span class="badge badge-origin">Origen: Aduabook 3</span></td>
+              <td>1-002</td>
+              <td>170</td>
+              <td>—</td>
+              <td>Carta_envio.pdf</td>
+              <td class="invoice-na">Sin Factura / N/A</td>
+              <td>Identificador general</td>
+              <td><span class="badge badge-listo">Listo para revisar</span></td>
+              <td>2026-10-15</td>
+              <td>aduabook3</td>
+              <td class="js-actions"></td>
+            </tr>
+            <tr>
+              <td>BL</td>
+              <td>1-002</td>
+              <td>170</td>
+              <td>—</td>
+              <td>BL_FM00132091.pdf</td>
+              <td class="invoice">FM00132091</td>
+              <td>Identificador general</td>
+              <td><span class="badge badge-obs">Con observaciones</span></td>
+              <td>2026-10-15</td>
+              <td>asmendez</td>
+              <td class="js-actions"></td>
+            </tr>
+            <tr>
+              <td>Permiso</td>
+              <td>1-002</td>
+              <td>170</td>
+              <td>—</td>
+              <td>OficioRenovacionEPN.pdf</td>
+              <td class="invoice">EPN-88421</td>
+              <td>Permiso</td>
+              <td><span class="badge badge-ok">Autorizado</span></td>
+              <td>2026-10-15</td>
+              <td>asmendez</td>
+              <td class="js-actions"></td>
+            </tr>
+            <tr>
+              <td>Packing list</td>
+              <td>1-002</td>
+              <td>170</td>
+              <td>—</td>
+              <td>PackingList_10008872.pdf</td>
+              <td class="invoice-na">Sin Factura / N/A</td>
+              <td>Identificador general</td>
+              <td><span class="badge badge-ok">Autorizado</span></td>
+              <td>2026-10-15</td>
+              <td>asmendez</td>
+              <td class="js-actions"></td>
+            </tr>
+            <tr>
+              <td>Certificado de origen</td>
+              <td>1-002</td>
+              <td>170</td>
+              <td>—</td>
+              <td>Cert_Origen.pdf</td>
+              <td class="invoice">INV-2026-0412</td>
+              <td>Identificador general</td>
+              <td><span class="badge badge-listo">Listo para revisar</span></td>
+              <td>2026-10-15</td>
+              <td>asmendez</td>
+              <td class="js-actions"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  <script src="proto-nav.js"></script>
+  <script>
+    document.querySelectorAll(".js-actions").forEach((td) => {
+      td.innerHTML = `<div class="document-actions">
+        <a class="document-action-button" href="revision.html" title="Revisar" aria-label="Revisar">${protoIcons.check}</a>
+        <button class="document-action-button" type="button" title="Eliminar" aria-label="Eliminar">${protoIcons.trash}</button>
+      </div>`;
+    });
+    const q = document.getElementById("q");
+    q.addEventListener("input", () => {
+      const v = q.value.trim().toLowerCase();
+      document.querySelectorAll("#grid tbody tr").forEach((tr) => {
+        tr.style.display = tr.textContent.toLowerCase().includes(v) ? "" : "none";
+      });
+    });
+  </script>
+</body>
+</html>

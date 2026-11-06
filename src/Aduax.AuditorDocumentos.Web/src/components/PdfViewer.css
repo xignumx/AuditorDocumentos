@@ -1,0 +1,40 @@
+.pdf-viewer {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #E9E8E2;
+  border-radius: 16px;
+  background: #ffffff;
+  overflow: hidden;
+  max-height: 80vh;
+}
+
+.pdf-viewer-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #E9E8E2;
+  background: #F9F9F7;
+}
+
+.pdf-viewer-title {
+  font-family: "Outfit", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #292929;
+}
+
+.pdf-viewer-frame {
+  width: 100%;
+  height: min(520px, 60vh);
+  border: none;
+  background: #ffffff;
+}
+
+.pdf-viewer-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  font-family: "Outfit", sans-serif;
+  font-size: 13px;
+  color: #6E6E6E;
+  background: #ffffff;
+}

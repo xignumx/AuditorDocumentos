@@ -1,0 +1,75 @@
+.vucem-selector {
+  padding: 20px;
+  border-radius: 15px;
+}
+
+.vucem-selector-search {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid #e3e2d8;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.vucem-selector-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.vucem-selector-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+  border: 1px solid #e3e2d8;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.vucem-selector-item.active {
+  border-color: #292929;
+  background: #f8f7f5;
+}
+
+.vucem-selector-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #292929;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e3e2d8;
+}
+
+.vucem-selector-meta {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.vucem-selector-subtitle {
+  font-size: 12px;
+  color: #6e6e6e;
+  text-align: center;
+}
+
+.vucem-selector-divider {
+  width: 1px;
+  height: 16px;
+  background: #e3e2d8;
+}
+
+.vucem-selector-status {
+  font-size: 12px;
+  color: #6e6e6e;
+  padding: 8px 0;
+  text-align: center;
+}

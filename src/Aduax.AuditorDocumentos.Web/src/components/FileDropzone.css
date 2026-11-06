@@ -1,0 +1,91 @@
+.file-dropzone {
+  width: 100%;
+  border: 1.5px dashed #C9C7BE;
+  border-radius: 14px;
+  padding: 18px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #FBFBFA;
+  color: #3E3E3E;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.file-dropzone.dragging {
+  border-color: #5B7CFA;
+  background: #F2F5FF;
+}
+
+.file-dropzone.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.file-dropzone-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  border: 1px solid #E9E8E2;
+}
+
+.file-dropzone-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: "Outfit", sans-serif;
+}
+
+.file-dropzone-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #292929;
+}
+
+.file-dropzone-helper {
+  font-size: 12px;
+  color: #6E6E6E;
+}
+
+.file-dropzone-input {
+  display: none;
+}
+
+.file-dropzone-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 16px;
+}
+
+.file-dropzone-panel {
+  display: flex;
+}
+
+.file-preview-panel {
+  border: 1px solid #E9E8E2;
+  border-radius: 14px;
+  background: #ffffff;
+  min-height: 280px;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.file-preview-frame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.file-preview-empty {
+  padding: 16px;
+  font-family: "Outfit", sans-serif;
+  font-size: 12px;
+  color: #6E6E6E;
+  text-align: center;
+}

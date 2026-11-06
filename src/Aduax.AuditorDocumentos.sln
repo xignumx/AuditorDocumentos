@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36804.6
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aduax.AuditorDocumentos.Api", "Aduax.AuditorDocumentos.Api\Aduax.AuditorDocumentos.Api.csproj", "{129BDC20-9EC1-41B9-92F6-8ED2FC4051DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aduax.AuditorDocumentos.VModels", "Aduax.AuditorDocumentos.VModels\Aduax.AuditorDocumentos.VModels.csproj", "{11C5FA15-55F1-4568-AB49-2F849973CFD2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{129BDC20-9EC1-41B9-92F6-8ED2FC4051DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{129BDC20-9EC1-41B9-92F6-8ED2FC4051DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{129BDC20-9EC1-41B9-92F6-8ED2FC4051DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{129BDC20-9EC1-41B9-92F6-8ED2FC4051DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11C5FA15-55F1-4568-AB49-2F849973CFD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11C5FA15-55F1-4568-AB49-2F849973CFD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11C5FA15-55F1-4568-AB49-2F849973CFD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11C5FA15-55F1-4568-AB49-2F849973CFD2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {949FEE71-06A0-42E1-AE24-1E8A56A440EA}
+	EndGlobalSection
+EndGlobal

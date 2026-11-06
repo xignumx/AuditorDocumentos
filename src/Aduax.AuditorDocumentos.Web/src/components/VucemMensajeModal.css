@@ -1,0 +1,16 @@
+.vucem-mensaje-overlay {
+  z-index: 50;
+}
+
+.vucem-mensaje-modal {
+  width: min(520px, 92vw);
+}
+
+.vucem-mensaje-modal-body {
+  margin-top: 4px;
+}
+
+.vucem-mensaje-modal-actions .oc-button {
+  padding: 10px 20px;
+  font-size: 13px;
+}

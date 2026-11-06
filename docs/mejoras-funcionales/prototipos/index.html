@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Expediente — Carga y bandeja</title>
+  <link rel="stylesheet" href="proto.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <div data-header="expediente"></div>
+    <div data-page-header data-title="Expediente" data-subtitle="Carga, prelectura y transmisión por referencia. El alta individual actual no se modifica."></div>
+
+    <div class="tabs">
+      <a class="tab active" href="index.html">Carga y bandeja</a>
+      <a class="tab" href="expediente-documentos.html">Documentos</a>
+    </div>
+
+    <section class="panel">
+      <div class="context-bar">
+        <div class="field">
+          <label for="ref">Referencia</label>
+          <div class="ref-row">
+            <input id="ref" value="10008872/0" />
+            <button class="btn btn-ghost" type="button" id="btnConsultar">Consultar</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Cliente</label>
+          <input id="ctxCliente" readonly value="0324 PARKER-HANNIFIN DE MÉXICO SA DE CV (TOLUCA)" />
+        </div>
+        <div class="field">
+          <label>Operación</label>
+          <input id="ctxOp" readonly value="IMPO" />
+        </div>
+        <div class="field">
+          <label>Cve. pedimento</label>
+          <input id="ctxCve" readonly value="A1" />
+        </div>
+      </div>
+      <p class="hint" id="syncHint">Sincronizado con Aduabook 3: 1 archivo recibido. 1 duplicado omitido (Carta_envio.pdf).</p>
+    </section>
+
+    <div class="bandeja-grid">
+      <section class="panel">
+        <div class="section-title" style="margin-bottom:12px">Carga de documentos</div>
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <strong>Arrastra aquí tus archivos PDF</strong>
+          <span>o selección múltiple desde el equipo</span>
+          <button class="btn btn-outline" type="button" id="btnSelect">Seleccionar archivos</button>
+          <input id="fileInput" type="file" accept="application/pdf" multiple hidden />
+        </div>
+      </section>
+
+      <section class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="section-title">Documentos cargados</div>
+          <span class="hint" id="totalLabel">Total documentos: 6</span>
+        </div>
+        <div class="table-wrap">
+          <table class="docs" id="tabla">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Nombre original</th>
+                <th>Tipo sugerido (IA)</th>
+                <th>Confirmado</th>
+                <th>Estatus</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="footer-bar">
+          <div class="metrics" id="metrics"></div>
+          <div class="actions">
+            <label class="check"><input type="checkbox" id="selAuth" /> Seleccionar autorizados</label>
+            <button class="btn btn-primary" type="button" id="btnTx">Transmitir seleccionados a VUCEM</button>
+            <a class="btn btn-outline" href="revision.html">Revisar</a>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="overlay" id="modalSello" role="dialog" aria-labelledby="selloTitle">
+    <div class="modal">
+      <h3 id="selloTitle">Selección de sello VUCEM</h3>
+      <p class="hint">El lote usa la referencia 10008872/0. Solo documentos Autorizado.</p>
+      <p class="sello-count hint" id="selloCount"></p>
+      <div class="field" style="margin-top:12px">
+        <label>Correo (opcional)</label>
+        <input placeholder="operaciones@empresa.com" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" type="button" data-close>Cancelar</button>
+        <button class="btn btn-outline" type="button" data-sello="cliente">Sello cliente</button>
+        <button class="btn btn-primary" type="button" data-sello="agente">Agente aduanal</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="modalResultado" role="dialog">
+    <div class="modal modal-lg">
+      <h3>Resultado de transmisión</h3>
+      <div class="table-wrap" style="margin-top:12px">
+        <table class="docs">
+          <thead><tr><th>Archivo</th><th>Resultado</th></tr></thead>
+          <tbody>
+            <tr><td>OficioRenovacionEPN.pdf</td><td><span class="badge badge-edocs">Digitalizado eDOCS</span></td></tr>
+            <tr><td>PackingList_10008872.pdf</td><td><span class="badge badge-err">Error: timeout VUCEM · reintento</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" type="button" data-close>Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="proto-nav.js"></script>
+  <script>
+    const tipos = ["Factura", "Carta", "BL", "Permiso", "Packing list", "Certificado de origen"];
+    const rows = [
+      { file: "FACT_0072171.pdf", tipo: "Factura", status: "leyendo", origin: false, check: false },
+      { file: "Carta_envio.pdf", tipo: "Carta", status: "listo", origin: true, check: false },
+      { file: "BL_FM00132091.pdf", tipo: "BL", status: "obs", check: false },
+      { file: "OficioRenovacionEPN.pdf", tipo: "Permiso", status: "ok", check: false },
+      { file: "PackingList_10008872.pdf", tipo: "Packing list", status: "ok", check: false },
+      { file: "Cert_Origen.pdf", tipo: "Certificado de origen", status: "listo", check: false },
+      { file: "FACT_0072171.pdf", tipo: "Factura", status: "leyendo", check: false, hiddenDup: true },
+    ];
+
+    const statusLabel = {
+      leyendo: '<span class="badge badge-leyendo"><span class="dot pulse"></span>Leyendo</span>',
+      listo: '<span class="badge badge-listo">Listo para revisar</span>',
+      obs: '<span class="badge badge-obs">Con observaciones</span>',
+      ok: '<span class="badge badge-ok">Autorizado</span>',
+      edocs: '<span class="badge badge-edocs">Digitalizado eDOCS</span>',
+      err: '<span class="badge badge-err">Error / reintento</span>',
+    };
+
+    const tbody = document.querySelector("#tabla tbody");
+
+    function selectOpts(selected) {
+      return tipos.map((t) => `<option${t === selected ? " selected" : ""}>${t}</option>`).join("");
+    }
+
+    function render() {
+      const visible = rows.filter((r) => !r.hiddenDup);
+      tbody.innerHTML = visible.map((r, i) => `
+        <tr>
+          <td><input type="checkbox" data-i="${i}" ${r.status === "ok" ? "" : "disabled"} ${r.check ? "checked" : ""} /></td>
+          <td>
+            <div class="file-cell">
+              ${protoIcons.file}
+              ${r.file}
+              ${r.origin ? '<span class="badge badge-origin">Origen: Aduabook 3</span>' : ""}
+            </div>
+          </td>
+          <td><select>${selectOpts(r.tipo)}</select></td>
+          <td><select>${selectOpts(r.tipo)}</select></td>
+          <td>${statusLabel[r.status]}</td>
+          <td>
+            <div class="document-actions">
+              <a class="document-action-button" href="revision.html" title="Revisar" aria-label="Revisar">${protoIcons.check}</a>
+              <button class="document-action-button" type="button" title="Eliminar" aria-label="Eliminar">${protoIcons.trash}</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+      const n = visible.length;
+      const leyendo = visible.filter((r) => r.status === "leyendo").length;
+      const listos = visible.filter((r) => r.status === "listo" || r.status === "ok").length;
+      const obs = visible.filter((r) => r.status === "obs").length;
+      document.getElementById("metrics").innerHTML =
+        `<span>Cargados: <b>${n}</b></span><span>Leyendo: <b>${leyendo}</b></span><span>Listos (A): <b>${listos}</b></span><span>Observaciones: <b>${obs}</b></span>`;
+      document.getElementById("totalLabel").textContent = `Total documentos: ${n}`;
+    }
+
+    render();
+
+    document.getElementById("selAuth").addEventListener("change", (e) => {
+      tbody.querySelectorAll("input[type=checkbox]").forEach((cb) => {
+        if (!cb.disabled) cb.checked = e.target.checked;
+      });
+    });
+
+    const modalSello = document.getElementById("modalSello");
+    const modalRes = document.getElementById("modalResultado");
+    document.getElementById("btnTx").addEventListener("click", () => {
+      const n = [...tbody.querySelectorAll("input[type=checkbox]:checked")].length;
+      if (!n) {
+        document.getElementById("selloCount").textContent = "No hay autorizados seleccionados. Se usarán los 2 autorizados de ejemplo.";
+      } else {
+        document.getElementById("selloCount").textContent = `Transmitir ${n} seleccionados.`;
+      }
+      modalSello.classList.add("open");
+    });
+    document.querySelectorAll("[data-close]").forEach((b) => {
+      b.addEventListener("click", () => {
+        modalSello.classList.remove("open");
+        modalRes.classList.remove("open");
+      });
+    });
+    document.querySelectorAll("[data-sello]").forEach((b) => {
+      b.addEventListener("click", () => {
+        modalSello.classList.remove("open");
+        modalRes.classList.add("open");
+      });
+    });
+
+    const dz = document.getElementById("dropzone");
+    const fi = document.getElementById("fileInput");
+    document.getElementById("btnSelect").addEventListener("click", () => fi.click());
+    dz.addEventListener("dragover", (e) => { e.preventDefault(); dz.style.borderColor = "#ff5800"; });
+    dz.addEventListener("dragleave", () => { dz.style.borderColor = ""; });
+    dz.addEventListener("drop", (e) => { e.preventDefault(); dz.style.borderColor = ""; });
+  </script>
+</body>
+</html>

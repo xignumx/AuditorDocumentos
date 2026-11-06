@@ -1,0 +1,43 @@
+.field-card {
+  padding: 20px 24px;
+  border-radius: 15px;
+  background: #FFFFFF;
+  border: 1px solid #E9E8E2 !important;
+  box-shadow: none !important;
+}
+
+.field-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.field-card-icon {
+  font-size: 18px;
+  color: #6E6E6E;
+  display: flex;
+  align-items: center;
+}
+
+.field-card-label {
+  font-family: "Outfit", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #292929;
+}
+
+.field-card-toggles {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  .field-card-toggles {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}

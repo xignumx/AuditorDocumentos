@@ -1,0 +1,67 @@
+.paginated-multi-select {
+  position: relative;
+}
+
+/* Permitir que el trigger crezca con los tags y contener el contenido */
+.paginated-multi-select .select-selected,
+.paginated-multi-select-trigger {
+  height: auto;
+  min-height: 40px;
+  max-height: 140px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  align-items: flex-start;
+  padding: 10px 16px;
+}
+
+.paginated-multi-select-trigger {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 40px;
+}
+
+.paginated-multi-select-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.paginated-multi-select-tags .tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #F3F4F6;
+  color: #292929;
+  font-size: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.paginated-multi-select-tags .tag-remove {
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+}
+
+.paginated-multi-select-tags .tag-remove:hover {
+  opacity: 0.8;
+}
+
+.paginated-multi-select-tags .tag-remove:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.paginated-multi-select-tags .placeholder {
+  color: #9CA3AF;
+}

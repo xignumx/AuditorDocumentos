@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reportes</title>
+  <link rel="stylesheet" href="proto.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <div data-header="reportes"></div>
+    <div data-page-header data-title="Reportes" data-subtitle="Indicadores de uso. Cifras ilustrativas, no observadas."></div>
+
+    <div class="vucem-page-layout">
+      <div data-vucem-panel data-selected="all" data-all="true"></div>
+      <div class="vucem-page-main">
+        <section class="panel" style="margin-bottom:16px">
+          <p class="hint">Tipo documento: <b data-vucem-label>Todos los tipos</b></p>
+          <div class="context-bar">
+            <div class="field">
+              <label>Desde</label>
+              <input type="date" value="2026-10-01" />
+            </div>
+            <div class="field">
+              <label>Hasta</label>
+              <input type="date" value="2026-10-22" />
+            </div>
+            <div class="field">
+              <label>Cliente</label>
+              <select><option>Todos</option><option>0324 PARKER-HANNIFIN</option></select>
+            </div>
+          </div>
+          <button class="btn btn-outline" type="button">Exportar Excel/CSV</button>
+        </section>
+
+        <div class="kpis">
+          <div class="kpi"><div class="kpi-label">Documentos procesados</div><div class="kpi-value">1,284</div></div>
+          <div class="kpi"><div class="kpi-label">Lectura IA exitosa</div><div class="kpi-value">86%</div></div>
+          <div class="kpi"><div class="kpi-label">Envíos VUCEM</div><div class="kpi-value">412</div></div>
+          <div class="kpi"><div class="kpi-label">Correcciones manuales</div><div class="kpi-value">179</div></div>
+        </div>
+
+        <section class="panel" style="margin-top:16px">
+          <div class="section-title" style="margin-bottom:12px">Volumen por semana</div>
+          <div class="chart-fake" aria-hidden="true">
+            <div class="bar" style="height:40%"></div>
+            <div class="bar" style="height:55%"></div>
+            <div class="bar" style="height:48%"></div>
+            <div class="bar" style="height:72%"></div>
+            <div class="bar" style="height:64%"></div>
+            <div class="bar" style="height:88%"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+  <script src="proto-nav.js"></script>
+</body>
+</html>

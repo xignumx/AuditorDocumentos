@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reglas IA</title>
+  <link rel="stylesheet" href="proto.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <div data-header="ia"></div>
+    <div data-page-header data-title="Reglas IA" data-subtitle="Diccionario de sinónimos y prompts por tipo VUCEM. Acceso Compliance / Admin. No reemplaza /config."></div>
+
+    <div class="vucem-page-layout">
+      <div data-vucem-panel data-selected="170"></div>
+      <div class="vucem-page-main">
+        <p class="hint" style="margin-top:0">Tipo seleccionado: <b data-vucem-label>Factura / CFDI en importación</b></p>
+        <div class="tabs">
+          <span class="tab active">Prompts</span>
+          <span class="tab">Diccionario</span>
+          <span class="tab">Historial</span>
+        </div>
+
+        <section class="panel" id="panelPrompt">
+          <div class="field">
+            <label>Campo</label>
+            <select><option>Producto / No. de parte</option><option>Factura</option><option>Valor comercial</option></select>
+          </div>
+          <div class="field" style="margin-top:12px">
+            <label>Prompt parcial</label>
+            <textarea rows="8">Extrae el número de parte o código de producto. Considera encabezados equivalentes: Part No., Item, SKU, P/N, Artículo. Si hay tabla, toma la columna de identificador de mercancía por renglón y concatena valores con ;</textarea>
+          </div>
+          <div class="actions" style="margin-top:12px">
+            <button class="btn btn-primary" type="button">Guardar versión</button>
+          </div>
+        </section>
+
+        <section class="panel" id="panelDic" hidden>
+          <p class="hint">Equivalencias ES / EN usadas en la prelectura. Semilla del PDF de mejora.</p>
+          <div class="table-wrap">
+            <table class="docs">
+              <thead>
+                <tr><th>Campo destino</th><th>Sinónimos y abreviaturas</th><th></th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Producto / No. de parte</td>
+                  <td>Número de Parte, No. de Parte, N/P, NP, Item, Item Number, Item No., Part Number, Part No., P/N, PN, Product Code, Code, SKU, Artículo, Código, Referencia</td>
+                  <td><button class="btn btn-ghost" type="button">Editar</button></td>
+                </tr>
+                <tr>
+                  <td>Valor unitario</td>
+                  <td>Valor Unitario, Precio Unitario, P.U., P. Unitario, Precio / U, Unit Price, Price/Unit, Unit Cost, Price, Rate</td>
+                  <td><button class="btn btn-ghost" type="button">Editar</button></td>
+                </tr>
+                <tr>
+                  <td>Valor total / comercial</td>
+                  <td>Valor Total, Precio Total, Importe, Monto Total, Subtotal, Total, Total Amount, Amount, Ext. Price, Extended Price, Total Price, Line Total</td>
+                  <td><button class="btn btn-ghost" type="button">Editar</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="actions" style="margin-top:16px">
+            <button class="btn btn-outline" type="button">Agregar término</button>
+            <button class="btn btn-primary" type="button">Guardar diccionario</button>
+          </div>
+        </section>
+
+        <section class="panel" id="panelHist" hidden>
+          <ul class="hist">
+            <li>v3 · 2026-10-18 · mxochipa · Prompt Factura / No. de parte</li>
+            <li>v2 · 2026-10-12 · compliance01 · Alta sinónimos Valor total (EN)</li>
+            <li>v1 · 2026-10-02 · mxochipa · Carga inicial de diccionario</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+  <script src="proto-nav.js"></script>
+  <script>
+    const tabs = document.querySelectorAll(".tabs .tab");
+    const panels = [
+      document.getElementById("panelPrompt"),
+      document.getElementById("panelDic"),
+      document.getElementById("panelHist"),
+    ];
+    tabs.forEach((t, i) => {
+      t.style.cursor = "pointer";
+      t.addEventListener("click", () => {
+        tabs.forEach((x) => x.classList.remove("active"));
+        t.classList.add("active");
+        panels.forEach((p, j) => { p.hidden = j !== i; });
+      });
+    });
+  </script>
+</body>
+</html>

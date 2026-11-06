@@ -1,0 +1,88 @@
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "fontFamily": "Segoe UI, Arial, sans-serif",
+    "fontSize": "15px",
+    "primaryColor": "#E8EEF5",
+    "primaryTextColor": "#0F172A",
+    "primaryBorderColor": "#1E3A5F",
+    "lineColor": "#334155",
+    "secondaryColor": "#FFF7ED",
+    "tertiaryColor": "#F8FAFC",
+    "clusterBkg": "#F8FAFC",
+    "clusterBorder": "#64748B"
+  },
+  "flowchart": {
+    "htmlLabels": true,
+    "nodeSpacing": 24,
+    "rankSpacing": 28,
+    "padding": 12,
+    "subGraphTitleMargin": { "top": 8, "bottom": 8 }
+  }
+} }%%
+flowchart LR
+    subgraph ST1["1. Origen e ingesta"]
+        direction TB
+        A["Inicio: Cliente, Tipo VUCEM<br/>y Referencia"]
+        B{"¿Origen de<br/>expedientes?"}
+        C["Aduabook 3: API / Prealertas<br/>por Referencia"]
+        D{"Tipo de carga"}
+        E["Carga PDF individual<br/>en /repositorio/nuevo"]
+        F["Drag and drop masivo<br/>de PDFs por Referencia"]
+        A --> B
+        B -->|Sincronización automática| C
+        B -->|Carga de usuario| D
+        D -->|Individual| E
+        D -->|Masiva| F
+    end
+
+    subgraph ST2["2. Procesamiento IA"]
+        direction TB
+        G["OCR / IA en segundo plano"]
+        H["Vertex AI + diccionario<br/>de sinónimos y matriz<br/>de compliance"]
+        G --> H
+    end
+
+    subgraph ST3["3. Tablero y autorización"]
+        direction TB
+        I["Tablero de control<br/>de estatus"]
+        J{"Clasificación<br/>del tablero"}
+        K["En proceso: Procesando<br/>Vuelve a OCR / IA"]
+        L["Incidencias:<br/>Con observaciones"]
+        M["Revisión asistida / edición<br/>en tabla con columna Invoice"]
+        N["Confirmación 1-clic<br/>y feedback IA"]
+        O["Estatus: Autorizado"]
+        I --> J
+        J -->|En proceso| K
+        J -->|Incidencias / incompletos| L
+        L --> M --> N --> O
+        J -->|Lectura correcta| O
+    end
+
+    subgraph ST4["4. Transmisión masiva"]
+        direction TB
+        P["Repositorio: Invoice / Permiso<br/>visibles en la grilla"]
+        Q["Selección múltiple de<br/>documentos autorizados"]
+        R["Transmitir seleccionados<br/>a VUCEM"]
+        S["SOAP VUCEM / eDOCS<br/>en lote"]
+        T{"Resultado<br/>transmisión"}
+        U["Éxito:<br/>Digitalizado eDOCS"]
+        V["Fallo: historial de errores<br/>e identificación de reintento"]
+        P --> Q --> R --> S --> T
+        T -->|Éxito| U
+        T -->|Fallo| V
+    end
+
+    ST1 --> ST2 --> ST3 --> ST4
+
+    classDef proceso fill:#E8EEF5,stroke:#1E3A5F,stroke-width:1.5px,color:#0F172A
+    classDef decision fill:#FFF7ED,stroke:#C2410C,stroke-width:1.5px,color:#0F172A
+    classDef alerta fill:#FFEDD5,stroke:#C2410C,stroke-width:1.5px,color:#0F172A
+    classDef rechazo fill:#FEE2E2,stroke:#B91C1C,stroke-width:1.5px,color:#0F172A
+    classDef exito fill:#D1FAE5,stroke:#047857,stroke-width:1.5px,color:#0F172A
+
+    class A,C,E,F,G,H,I,M,N,P,Q,R,S proceso
+    class B,D,J,T decision
+    class K alerta
+    class L,V rechazo
+    class O,U exito

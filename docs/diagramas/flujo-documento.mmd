@@ -1,0 +1,92 @@
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "fontFamily": "Segoe UI, Arial, sans-serif",
+    "fontSize": "15px",
+    "primaryColor": "#E8EEF5",
+    "primaryTextColor": "#0F172A",
+    "primaryBorderColor": "#1E3A5F",
+    "lineColor": "#334155",
+    "secondaryColor": "#FFF7ED",
+    "tertiaryColor": "#F8FAFC",
+    "clusterBkg": "#F8FAFC",
+    "clusterBorder": "#64748B"
+  },
+  "flowchart": {
+    "htmlLabels": true,
+    "nodeSpacing": 24,
+    "rankSpacing": 28,
+    "padding": 12,
+    "subGraphTitleMargin": { "top": 8, "bottom": 8 }
+  }
+} }%%
+flowchart LR
+    subgraph ST1["1. Configuración"]
+        direction TB
+        A["Inicio: Usuario selecciona<br/>Cliente y Tipo VUCEM"]
+        B{"¿Existe Motor<br/>Configurado?"}
+        C["Alerta: Configura primero<br/>los documentos"]
+        A --> B
+        B -->|No| C
+        C -.->|Vuelve al inicio| A
+    end
+
+    subgraph ST2["2. Alta"]
+        direction TB
+        D["Carga PDF individual<br/>en /repositorio/nuevo"]
+        E["Preguardado automático<br/>Estatus: Registro"]
+        F{"¿Solicita<br/>Extracción IA?"}
+        G["Extraer datos<br/>Vertex AI síncrono"]
+        H["Llenado de campos IA"]
+        I["Captura manual de<br/>campos obligatorios"]
+        J["Completar datos y<br/>bloque de clasificación"]
+        K["Guardar: Pendiente<br/>y subida a AWS"]
+        D --> E --> F
+        F -->|Sí| G --> H --> J
+        F -->|No| I --> J
+        J --> K
+    end
+
+    subgraph ST3["3. Auditoría"]
+        direction TB
+        L["Revisión en Repositorio<br/>/repositorio"]
+        M{"Dictamen de<br/>Auditoría"}
+        N["Motivo de rechazo<br/>Estatus: Rechazado"]
+        O["Aprobar documento<br/>Estatus: Aprobado"]
+        L --> M
+        M -->|Rechazar| N
+        M -->|Autorizar| O
+    end
+
+    subgraph ST4["4. Asociación"]
+        direction TB
+        P["Relacionar operación<br/>Sugerencia ADUASIS"]
+        Q["Asociar e insertar datos<br/>en Pedimento/Tráfico"]
+        R["Alta de archivo en eDOCS<br/>Estatus: Vinculado"]
+        P --> Q --> R
+    end
+
+    subgraph ST5["5. VUCEM"]
+        direction TB
+        SV["SOAP VUCEM por fila<br/>Sello Cliente/Agente"]
+        T{"¿Resultado<br/>Envío VUCEM?"}
+        U["Estatus:<br/>Digitalizado eDOCS"]
+        V["Mantiene estatus<br/>y bitácora de error"]
+        SV --> T
+        T -->|Éxito| U
+        T -->|Fallo| V
+    end
+
+    ST1 --> ST2 --> ST3 --> ST4 --> ST5
+
+    classDef proceso fill:#E8EEF5,stroke:#1E3A5F,stroke-width:1.5px,color:#0F172A
+    classDef decision fill:#FFF7ED,stroke:#C2410C,stroke-width:1.5px,color:#0F172A
+    classDef alerta fill:#FFEDD5,stroke:#C2410C,stroke-width:1.5px,color:#0F172A
+    classDef rechazo fill:#FEE2E2,stroke:#B91C1C,stroke-width:1.5px,color:#0F172A
+    classDef exito fill:#D1FAE5,stroke:#047857,stroke-width:1.5px,color:#0F172A
+
+    class A,D,E,G,H,I,J,K,L,P,Q,R,SV proceso
+    class B,F,M,T decision
+    class C alerta
+    class N,V rechazo
+    class O,U exito

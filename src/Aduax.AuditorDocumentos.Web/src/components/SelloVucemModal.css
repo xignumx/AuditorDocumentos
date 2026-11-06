@@ -1,0 +1,46 @@
+.sello-vucem-overlay {
+  z-index: 50;
+}
+
+.sello-vucem-modal {
+  width: min(520px, 92vw);
+}
+
+.sello-vucem-modal-body {
+  margin-top: 4px;
+}
+
+.sello-vucem-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sello-vucem-operacion-tag {
+  align-self: flex-start;
+}
+
+.sello-vucem-hint {
+  margin: 0;
+  font-family: "Outfit", sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #6b7280;
+}
+
+.sello-vucem-correo-hint {
+  font-family: "Outfit", sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #9ca3af;
+}
+
+.sello-vucem-modal-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.sello-vucem-modal-actions .oc-button {
+  padding: 10px 20px;
+  font-size: 13px;
+}
