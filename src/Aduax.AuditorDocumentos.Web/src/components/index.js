@@ -16,3 +16,4 @@ export { default as AlertModal } from "./AlertModal";
 export { default as FileDropzone } from "./FileDropzone";
 export { default as TagInput } from "./TagInput";
 export { default as PdfViewer } from "./PdfViewer";
+export { default as RequirePermission } from "./RequirePermission";

@@ -1,5 +1,62 @@
 import { request } from "./httpClient";
 /**
+ * @typedef {Object} IaPromptDocumento
+ * @property {number} id
+ * @property {number} idTipoDocumentoVucem
+ * @property {string} prompt
+ * @property {boolean} activo
+ * @property {number} version
+ * @property {string} [fechaActualizacion]
+ * @property {string} [actualizadoPor]
+ */
+/**
+ * @typedef {Object} IaPromptCampo
+ * @property {number} id
+ * @property {number} idTipoDocumentoVucem
+ * @property {number} idCampo
+ * @property {string} nombreCampo
+ * @property {string} promptParcial
+ * @property {boolean} activo
+ * @property {number} version
+ * @property {string} [fechaActualizacion]
+ * @property {string} [actualizadoPor]
+ */
+/**
+ * @typedef {Object} IaPrompts
+ * @property {IaPromptDocumento|null} promptDocumento
+ * @property {IaPromptCampo[]} promptsCampo
+ */
+/**
+ * @typedef {Object} IaDiccionarioConcepto
+ * @property {"GENERAL"|"UM"} categoria
+ * @property {string} concepto Nombre del dato (GENERAL) o id_unidad_universal (UM)
+ * @property {number|null} [idCampo]
+ * @property {string|null} [descripcion] Descripción de la unidad (solo UM, solo lectura)
+ * @property {string[]} terminosEs
+ * @property {string[]} terminosEn
+ */
+/**
+ * @typedef {Object} IaHistorial
+ * @property {number} id
+ * @property {"PROMPT_DOC"|"PROMPT_CAMPO"|"DICCIONARIO"} entidad
+ * @property {string} clave
+ * @property {number|null} idTipoDocumentoVucem
+ * @property {number|null} idCampo
+ * @property {number} version
+ * @property {"ALTA"|"CAMBIO"|"ELIMINACION"} accion
+ * @property {string|null} valorAnterior
+ * @property {string|null} valorNuevo
+ * @property {string} usuario
+ * @property {string} fecha
+ */
+/**
+ * @typedef {Object} UnidadMedida
+ * @property {string} idUnidadUniversal
+ * @property {string|null} descripcion
+ * @property {string|null} descAbreviada
+ * @property {string|null} cveUnidadOficial
+ */
+/**
  * @typedef {Object} DocumentoVucem
  * @property {number} id_DocumentoVucem
  * @property {number} id_Cliente
@@ -278,6 +335,106 @@ export const motorConfigService = {
    */
   async validaUsuarioAdminLider(token) {
     return request("/api/MotorConfig/ValidaUsuarioAdminLider", {
+      method: "GET",
+      token,
+    });
+  },
+  /**
+   * Prompts de documento y de campo del tipo VUCEM (reglas de IA, solo Compliance).
+   * @param {number} idTipoDocumentoVucem
+   * @param {string} [token]
+   * @returns {Promise<import("../models/api").ApiResponseData<IaPrompts>>}
+   */
+  async obtenerPromptsIa(idTipoDocumentoVucem, token) {
+    return request("/api/MotorConfig/ObtenerPromptsIa", {
+      method: "POST",
+      body: JSON.stringify({ idTipoDocumentoVucem }),
+      token,
+    });
+  },
+  /**
+   * Crea o actualiza un prompt (cada cambio genera una versión). Devuelve los prompts actualizados del tipo.
+   * @param {number} idTipoDocumentoVucem
+   * @param {{ tipo: "DOCUMENTO"|"CAMPO", idCampo?: number|null, texto: string, activo: boolean }} data
+   * @param {string} [token]
+   * @returns {Promise<import("../models/api").ApiResponseData<IaPrompts>>}
+   */
+  async guardarPromptIa(idTipoDocumentoVucem, data, token) {
+    return request("/api/MotorConfig/GuardarPromptIa", {
+      method: "POST",
+      body: JSON.stringify({ idTipoDocumentoVucem, data }),
+      token,
+    });
+  },
+  /**
+   * @param {"GENERAL"|"UM"|undefined} categoria
+   * @param {string} [token]
+   * @returns {Promise<import("../models/api").ApiResponseData<IaDiccionarioConcepto[]>>}
+   */
+  async obtenerDiccionarioIa(categoria, token) {
+    return request("/api/MotorConfig/ObtenerDiccionarioIa", {
+      method: "POST",
+      body: JSON.stringify({ data: { categoria } }),
+      token,
+    });
+  },
+  /**
+   * Crea o reemplaza los términos de un concepto (clave: categoría + concepto).
+   * @param {IaDiccionarioConcepto} data
+   * @param {string} [token]
+   * @returns {Promise<import("../models/api").ApiResponseData<IaDiccionarioConcepto>>}
+   */
+  async guardarDiccionarioConceptoIa(data, token) {
+    return request("/api/MotorConfig/GuardarDiccionarioConceptoIa", {
+      method: "POST",
+      body: JSON.stringify({ data }),
+      token,
+    });
+  },
+  /**
+   * @param {{ categoria: "GENERAL"|"UM", concepto: string }} data
+   * @param {string} [token]
+   * @returns {Promise<import("../models/api").ApiResponseData<boolean>>}
+   */
+  async eliminarDiccionarioConceptoIa(data, token) {
+    return request("/api/MotorConfig/EliminarDiccionarioConceptoIa", {
+      method: "POST",
+      body: JSON.stringify({ data }),
+      token,
+    });
+  },
+  /**
+   * @param {{ data?: { entidad?: string, idTipoDocumentoVucem?: number|null }, page: number, size: number }} payload
+   * @param {string} [token]
+   * @returns {Promise<import("../models/api").ApiResponse<IaHistorial>>}
+   */
+  async obtenerHistorialIa(payload, token) {
+    return request("/api/MotorConfig/ObtenerHistorialIa", {
+      method: "POST",
+      body: JSON.stringify(payload),
+      token,
+    });
+  },
+  /**
+   * Catálogo paginado de unidades de medida de ADUASIS (para equivalencias de UM).
+   * @param {{ filter?: string, page: number, size: number }} payload
+   * @param {string} [token]
+   * @returns {Promise<import("../models/api").ApiResponse<UnidadMedida>>}
+   */
+  async obtenerUnidadesMedida(payload, token) {
+    return request("/api/MotorConfig/ObtenerUnidadesMedida", {
+      method: "POST",
+      body: JSON.stringify(payload),
+      token,
+    });
+  },
+  /**
+   * Indica si el usuario puede usar las pantallas exclusivas de Compliance.
+   * @param {string} [token]
+   * @returns {Promise<import("../models/api").ApiResponseData<boolean>>}
+   */
+  async validaUsuarioCompliance(token) {
+    return request("/api/MotorConfig/ValidaUsuarioCompliance", {
       method: "GET",
       token,
     });

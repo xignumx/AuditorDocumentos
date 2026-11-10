@@ -12,6 +12,7 @@ namespace Aduax.AuditorDocumentos.Api.Data
 
         public DbSet<AdMotorConfigHeader> AdMotorConfigHeaders { get; set; }
         public DbSet<AdMotorConfigDetalle> AdMotorConfigDetalles { get; set; }
+        public DbSet<AdMotorConfigBitacora> AdMotorConfigBitacora { get; set; }
         public DbSet<AdDocumentos> AdDocumentos { get; set; }
         public DbSet<AdDocumentosArchivos> AdDocumentosArchivos { get; set; }
         public DbSet<AdRelDocumentoEdoc> AdRelDocumentoEdoc { get; set; }
@@ -25,6 +26,8 @@ namespace Aduax.AuditorDocumentos.Api.Data
         public DbSet<AdIaPromptCampo> AdIaPromptCampo { get; set; }
         public DbSet<AdIaPromptDocumento> AdIaPromptDocumento { get; set; }
         public DbSet<AdIaEjecucion> AdIaEjecucion { get; set; }
+        public DbSet<AdIaDiccionario> AdIaDiccionario { get; set; }
+        public DbSet<AdIaConfigHistorial> AdIaConfigHistorial { get; set; }
         public DbSet<AdCatEventos> AdCatEventos { get; set; }
         public DbSet<AdBitacoraEventos> AdBitacoraEventos { get; set; }
         public DbSet<AdDocumentosIdentificadorGeneral> AdDocumentosIdentificadorGeneral { get; set; }
@@ -73,6 +76,14 @@ namespace Aduax.AuditorDocumentos.Api.Data
                 .WithMany(h => h.Detalles)
                 .HasForeignKey(d => d.IdMotorConfigHeader)
                 .HasConstraintName("FK_ad_motor_config_detalle_header")
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Relación: AdMotorConfigBitacora -> AdMotorConfigHeader (sin navegación)
+            modelBuilder.Entity<AdMotorConfigBitacora>()
+                .HasOne<AdMotorConfigHeader>()
+                .WithMany()
+                .HasForeignKey(b => b.IdMotorConfigHeader)
+                .HasConstraintName("FK_ad_motor_config_bitacora_header")
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Relación: AdDocumentos -> AdMotorConfigHeader

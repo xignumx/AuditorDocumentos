@@ -8,6 +8,7 @@ using Aduax.AuditorDocumentos.Api.Services.Aduasis;
 using Aduax.AuditorDocumentos.Api.Services.DesarrolloDb;
 using Aduax.AuditorDocumentos.Api.Services.EDOCS;
 using Aduax.AuditorDocumentos.Api.Services.FileStorage;
+using Aduax.AuditorDocumentos.Api.Services.IaReglas;
 using Aduax.AuditorDocumentos.Api.Services.Vucem;
 using Aduax.AuditorDocumentos.Api.Services.VertexIA;
 using Aduax.AuditorDocumentos.Api.Services.VertexIA.Models;
@@ -30,19 +31,22 @@ namespace Aduax.AuditorDocumentos.Api.Controllers
         private readonly IEDOCS_DbContextServices _eDOCS_DbContextServices;
         private readonly IFileStorageService _fileStorageService;
         private readonly IVucemApiClient _vucemApiClient;
+        private readonly IIaReglasService _iaReglasService;
 
         public DocumentosController(
             IDesarrolloDb_DbContextServices desarrolloDbService,
             IAduasisDbContextServices aduasisDbContextServices,
             IEDOCS_DbContextServices eDOCS_DbContextServices,
             IFileStorageService fileStorageService,
-            IVucemApiClient vucemApiClient)
+            IVucemApiClient vucemApiClient,
+            IIaReglasService iaReglasService)
         {
             _desarrolloDbService = desarrolloDbService;
             _aduasisDbContextServices = aduasisDbContextServices;
             _eDOCS_DbContextServices = eDOCS_DbContextServices;
             _fileStorageService = fileStorageService;
             _vucemApiClient = vucemApiClient;
+            _iaReglasService = iaReglasService;
         }
 
         [HttpPost("ExtraDatosDocumentoIa")]
@@ -233,6 +237,11 @@ namespace Aduax.AuditorDocumentos.Api.Controllers
                     .Replace("[CAMPOS]", listaCampos.ToString().TrimEnd())
                     .Replace("[JSON]", jsonStructure.ToString());
 
+                // Diccionario de sinónimos parametrizado por Compliance (marcador [SINONIMOS] o al final del prompt)
+                promptFinal = await _iaReglasService.AplicarSinonimosAsync(
+                    promptFinal,
+                    detallesVisibles.Select(d => d.IdCampo).ToList());
+
                 // Recuperar configuración de IA
                 var configIa = await _desarrolloDbService.GetConfiguracionIaAsync("Google");
                 if (configIa == null)
@@ -372,6 +381,9 @@ namespace Aduax.AuditorDocumentos.Api.Controllers
 
                 // Ordenar por IdCampo
                 camposExtraidos = camposExtraidos.OrderBy(c => c.IdCampo).ToList();
+
+                // Equivalencias globales de UM (la respuesta cruda de la IA ya quedó guardada en ad_ia_ejecucion)
+                await _iaReglasService.NormalizarUnidadesMedidaAsync(camposExtraidos);
 
                 return Ok(new GenericResponse<List<CampoExtraidoIA>>
                 {

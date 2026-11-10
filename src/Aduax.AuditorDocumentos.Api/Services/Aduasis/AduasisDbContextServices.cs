@@ -156,6 +156,81 @@ namespace Aduax.AuditorDocumentos.Api.Services.Aduasis
             return results.FirstOrDefault()?.Value;
         }
 
+        public async Task<(List<UnidadMedidaDto> Data, int TotalRecords)> GetUnidadesMedidaAsync(string? filter, int page, int size)
+        {
+            if (page < 1) page = 1;
+            if (size < 1) size = 10;
+
+            var filtro = filter?.Trim() ?? string.Empty;
+
+            const string where = @"
+                WHERE (@filtro = ''
+                       OR id_unidad_universal LIKE '%' + @filtro + '%'
+                       OR descripcion LIKE '%' + @filtro + '%'
+                       OR desc_abreviada LIKE '%' + @filtro + '%'
+                       OR cve_unidad_oficial LIKE '%' + @filtro + '%')";
+
+            var sqlCount = $@"
+                SELECT COUNT(*) AS Value
+                FROM ADUASIS.dbo.funidad_universal WITH (NOLOCK)
+                {where}";
+
+            var sqlData = $@"
+                SELECT CAST(id_unidad_universal AS VARCHAR(50)) AS IdUnidadUniversal,
+                       CAST(descripcion AS VARCHAR(200)) AS Descripcion,
+                       CAST(desc_abreviada AS VARCHAR(50)) AS DescAbreviada,
+                       CAST(cve_unidad_oficial AS VARCHAR(50)) AS CveUnidadOficial
+                FROM ADUASIS.dbo.funidad_universal WITH (NOLOCK)
+                {where}
+                ORDER BY descripcion, id_unidad_universal
+                OFFSET @skip ROWS FETCH NEXT @size ROWS ONLY";
+
+            var totalRows = await _context.Database
+                .SqlQueryRaw<IntegerResult>(sqlCount, new SqlParameter("@filtro", SqlDbType.VarChar, 100) { Value = filtro })
+                .ToListAsync();
+
+            var data = await _context.Database
+                .SqlQueryRaw<UnidadMedidaDto>(
+                    sqlData,
+                    new SqlParameter("@filtro", SqlDbType.VarChar, 100) { Value = filtro },
+                    new SqlParameter("@skip", SqlDbType.Int) { Value = (page - 1) * size },
+                    new SqlParameter("@size", SqlDbType.Int) { Value = size })
+                .ToListAsync();
+
+            return (data, totalRows.FirstOrDefault()?.Value ?? 0);
+        }
+
+        public async Task<List<UnidadMedidaDto>> GetUnidadesMedidaPorIdsAsync(IReadOnlyCollection<string> ids)
+        {
+            var idsLimpios = ids
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Select(id => id.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (idsLimpios.Count == 0)
+            {
+                return new List<UnidadMedidaDto>();
+            }
+
+            var parametros = idsLimpios
+                .Select((id, index) => new SqlParameter($"@id{index}", SqlDbType.VarChar, 50) { Value = id })
+                .ToArray();
+            var listaParametros = string.Join(", ", parametros.Select(p => p.ParameterName));
+
+            var sql = $@"
+                SELECT CAST(id_unidad_universal AS VARCHAR(50)) AS IdUnidadUniversal,
+                       CAST(descripcion AS VARCHAR(200)) AS Descripcion,
+                       CAST(desc_abreviada AS VARCHAR(50)) AS DescAbreviada,
+                       CAST(cve_unidad_oficial AS VARCHAR(50)) AS CveUnidadOficial
+                FROM ADUASIS.dbo.funidad_universal WITH (NOLOCK)
+                WHERE id_unidad_universal IN ({listaParametros})";
+
+            return await _context.Database
+                .SqlQueryRaw<UnidadMedidaDto>(sql, parametros.Cast<object>().ToArray())
+                .ToListAsync();
+        }
+
         public async Task<string?> ValidaPaisAsync(string pais)
         {
             var sql = @"

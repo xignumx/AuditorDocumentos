@@ -11,12 +11,14 @@ import {
   ConfigurationsPage,
   DocumentRepositoryListPage,
   DocumentRepositoryCreatePage,
+  IaRulesPage,
   NotificationConfigPage,
 } from "./pages";
-import { AppHeader } from "./components";
+import { AppHeader, RequirePermission } from "./components";
+import useConfigPermissions from "./hooks/useConfigPermissions";
 import "./styles/App.css";
 
-function AppRoutes({ selectedClient }) {
+function AppRoutes({ selectedClient, permissions }) {
   const location = useLocation();
   const search = location.search || "";
 
@@ -29,6 +31,17 @@ function AppRoutes({ selectedClient }) {
       <Route
         path="/config"
         element={<ConfigurationsPage selectedClient={selectedClient} />}
+      />
+      <Route
+        path="/config/ia-rules"
+        element={
+          <RequirePermission
+            allowed={permissions.canAccessCompliance}
+            loaded={permissions.loaded}
+          >
+            <IaRulesPage />
+          </RequirePermission>
+        }
       />
       <Route
         path="/repositorio"
@@ -49,6 +62,8 @@ function AppRoutes({ selectedClient }) {
 
 export default function App() {
   const [selectedClient, setSelectedClient] = useState("");
+  // Permisos de configuración: se consultan una sola vez para menú y guards de ruta.
+  const permissions = useConfigPermissions();
 
   return (
     <BrowserRouter basename="/AuditorDocumentos">
@@ -56,9 +71,11 @@ export default function App() {
         <AppHeader
           selectedClient={selectedClient}
           onClientChange={setSelectedClient}
+          canAccessConfig={permissions.canAccessConfig}
+          canAccessCompliance={permissions.canAccessCompliance}
         />
         <div className="app-content">
-          <AppRoutes selectedClient={selectedClient} />
+          <AppRoutes selectedClient={selectedClient} permissions={permissions} />
         </div>
         <ToastContainer position="top-right" autoClose={5000} />
       </div>

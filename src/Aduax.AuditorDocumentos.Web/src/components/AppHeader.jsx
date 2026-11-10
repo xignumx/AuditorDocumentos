@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { PaginatedSelect } from "../components";
 import { motorConfigService } from "../services";
@@ -8,6 +7,13 @@ const SettingsIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <circle cx="12" cy="12" r="3" />
     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0A1.65 1.65 0 0 0 9 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+  </svg>
+);
+
+const SparkIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" />
+    <path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z" />
   </svg>
 );
 
@@ -37,28 +43,21 @@ const BellIcon = () => (
   </svg>
 );
 
-export default function AppHeader({ selectedClient, onClientChange }) {
+export default function AppHeader({
+  selectedClient,
+  onClientChange,
+  canAccessConfig = false,
+  canAccessCompliance = false,
+}) {
   const location = useLocation();
   const search = location.search || "";
-  const [canAccessConfig, setCanAccessConfig] = useState(false);
-
-  useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const response = await motorConfigService.validaUsuarioAdminLider();
-        setCanAccessConfig(Boolean(response?.success && response?.data));
-      } catch (error) {
-        setCanAccessConfig(false);
-      }
-    };
-    loadProfile();
-  }, []);
 
   return (
     <header className="app-header">
       <div className="app-header-nav">
         <NavLink
           to={`/config${search}`}
+          end
           className={({ isActive }) =>
             `oc-link-btn app-header-link ${
               !canAccessConfig ? "disabled" : ""
@@ -73,6 +72,17 @@ export default function AppHeader({ selectedClient, onClientChange }) {
           <SettingsIcon />
           <span>Config. documentos</span>
         </NavLink>
+        {canAccessCompliance && (
+          <NavLink
+            to={`/config/ia-rules${search}`}
+            className={({ isActive }) =>
+              `oc-link-btn app-header-link ${isActive ? "active" : ""}`
+            }
+          >
+            <SparkIcon />
+            <span>Reglas IA</span>
+          </NavLink>
+        )}
         <NavLink
           to={`/repositorio${search}`}
           end

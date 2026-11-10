@@ -6,7 +6,7 @@ namespace Aduax.AuditorDocumentos.Api.Services.DesarrolloDb
     public interface IDesarrolloDb_DbContextServices
     {
         Task<AdMotorConfigHeader> GetMotorConfigHeaderConDetalleAsync(string idCliente, int idTipoDocumentoVucem);
-        Task<AdMotorConfigHeader> SaveMotorConfigHeaderConDetalleAsync(AdMotorConfigHeader motorConfigHeader);
+        Task<AdMotorConfigHeader> SaveMotorConfigHeaderConDetalleAsync(AdMotorConfigHeader motorConfigHeader, string origenBitacora = AdMotorConfigBitacoraOrigen.Manual);
         Task<bool> ExistsMotorConfigHeaderAsync(string idCliente, int idTipoDocumentoVucem);
         Task<string?> GetPerfilCargaPersistidoAsync(string idCliente, int idTipoDocumentoVucem);
         Task<Dictionary<int, string>> GetPerfilesCargaPorClienteAsync(string idCliente, IReadOnlyCollection<int> idTiposDocumentoVucem);

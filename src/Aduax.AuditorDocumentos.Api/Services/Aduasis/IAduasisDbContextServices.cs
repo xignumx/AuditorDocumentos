@@ -12,6 +12,8 @@ namespace Aduax.AuditorDocumentos.Api.Services.Aduasis
         Task<FCliente> GetClienteAsync(string idCliente);
         Task<string?> ValidaFraccionAsync(string idCliente, string idFraccion);
         Task<string?> ValidaUnidadMedidaAsync(string unidadMedida);
+        Task<(List<UnidadMedidaDto> Data, int TotalRecords)> GetUnidadesMedidaAsync(string? filter, int page, int size);
+        Task<List<UnidadMedidaDto>> GetUnidadesMedidaPorIdsAsync(IReadOnlyCollection<string> ids);
         Task<string?> ValidaPaisAsync(string pais);
         Task<List<CspAdSugerenciaPedimentos>> GetSugerenciaPedimentosAsync(
             string idCliente,

@@ -4,6 +4,7 @@ using Aduax.AuditorDocumentos.Api.Auth;
 using Aduax.AuditorDocumentos.Api.Data.Aduasis;
 using Aduax.AuditorDocumentos.Api.Data.DesarrolloDB;
 using Aduax.AuditorDocumentos.Api.Data.EDOCS;
+using Aduax.AuditorDocumentos.Api.Services;
 using Aduax.AuditorDocumentos.Api.Services.Aduasis;
 using Aduax.AuditorDocumentos.Api.Services.DesarrolloDb;
 using Aduax.AuditorDocumentos.Api.Services.EDOCS;
@@ -14,20 +15,29 @@ namespace Aduax.AuditorDocumentos.Api.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class MotorConfigController : ControllerBase
+    public partial class MotorConfigController : ControllerBase
     {
         private readonly IEDOCS_DbContextServices _edocsService;
         private readonly IAduasisDbContextServices _aduasisService;
         private readonly IDesarrolloDb_DbContextServices _desarrolloDbService;
+        private readonly IConfigAutorizacionService _configAutorizacionService;
+        private readonly IIaReglasDbContextServices _iaReglasDbService;
+
+        private const string MensajeConfigDenegada =
+            "Su perfil no tiene permiso para modificar la configuración del motor.";
 
         public MotorConfigController(
             IEDOCS_DbContextServices edocsService, 
             IAduasisDbContextServices aduasisService,
-            IDesarrolloDb_DbContextServices desarrolloDbService)
+            IDesarrolloDb_DbContextServices desarrolloDbService,
+            IConfigAutorizacionService configAutorizacionService,
+            IIaReglasDbContextServices iaReglasDbService)
         {
             _edocsService = edocsService;
             _aduasisService = aduasisService;
             _desarrolloDbService = desarrolloDbService;
+            _configAutorizacionService = configAutorizacionService;
+            _iaReglasDbService = iaReglasDbService;
         }
 
         [HttpPost("ObtenerDocumentosVucem")]
@@ -319,7 +329,28 @@ namespace Aduax.AuditorDocumentos.Api.Controllers
 
                 // Obtener el usuario del token
                 var tokenDTO = HttpContext.GetTokenLoginDTO();
-                string usuario = tokenDTO?.ShortUserName ?? "Sistema";
+                if (tokenDTO == null || string.IsNullOrWhiteSpace(tokenDTO.ShortUserName))
+                {
+                    return Unauthorized(new GenericResponse<AdMotorConfigHeader>
+                    {
+                        Success = false,
+                        Message = "No se pudo obtener la información del usuario autenticado",
+                        Data = null
+                    });
+                }
+
+                string usuario = tokenDTO.ShortUserName;
+
+                // Solo perfiles autorizados pueden guardar la configuración (el menú del front es solo visual)
+                if (!await _configAutorizacionService.PuedeAdministrarConfigPorClienteAsync(usuario))
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, new GenericResponse<AdMotorConfigHeader>
+                    {
+                        Success = false,
+                        Message = MensajeConfigDenegada,
+                        Data = null
+                    });
+                }
 
                 // Asignar usuario de auditoría según si es nuevo o actualización
                 if (request.Data.Id == 0)
@@ -844,9 +875,9 @@ namespace Aduax.AuditorDocumentos.Api.Controllers
                     });
                 }
 
-                bool esAdminLider = await _aduasisService.EsUsuarioAdminLider(tokenLogin.ShortUserName);
-                // si es admin, lider o calidad o mxochipa
-                esAdminLider = esAdminLider || tokenLogin.ShortUserName == "mxochipa";
+                // ADM, LIDER, CALIDAD, COMPLIANCE o usuario de soporte
+                bool esAdminLider = await _configAutorizacionService
+                    .PuedeAdministrarConfigPorClienteAsync(tokenLogin.ShortUserName);
 
                 return Ok(new GenericResponse<bool>
                 {
@@ -863,6 +894,45 @@ namespace Aduax.AuditorDocumentos.Api.Controllers
                 {
                     Success = false,
                     Message = $"Error al validar permisos del usuario: {ex.Message}",
+                    Data = false
+                });
+            }
+        }
+
+        [HttpGet("ValidaUsuarioCompliance")]
+        public async Task<ActionResult<GenericResponse<bool>>> ValidaUsuarioCompliance()
+        {
+            try
+            {
+                var tokenLogin = HttpContext.GetTokenLoginDTO();
+                if (tokenLogin == null || string.IsNullOrWhiteSpace(tokenLogin.ShortUserName))
+                {
+                    return Unauthorized(new GenericResponse<bool>
+                    {
+                        Success = false,
+                        Message = "No se pudo obtener la información del usuario autenticado",
+                        Data = false
+                    });
+                }
+
+                bool esCompliance = await _configAutorizacionService
+                    .PuedeAdministrarReglasComplianceAsync(tokenLogin.ShortUserName);
+
+                return Ok(new GenericResponse<bool>
+                {
+                    Success = true,
+                    Message = esCompliance
+                        ? "El usuario cuenta con permisos de Compliance"
+                        : "El usuario no cuenta con permisos de Compliance",
+                    Data = esCompliance
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new GenericResponse<bool>
+                {
+                    Success = false,
+                    Message = $"Error al validar permisos de Compliance: {ex.Message}",
                     Data = false
                 });
             }

@@ -60,7 +60,9 @@ namespace Aduax.AuditorDocumentos.Api.Services.DesarrolloDb
             return configHeader;
         }
 
-        public async Task<AdMotorConfigHeader> SaveMotorConfigHeaderConDetalleAsync(AdMotorConfigHeader motorConfigHeader)
+        public async Task<AdMotorConfigHeader> SaveMotorConfigHeaderConDetalleAsync(
+            AdMotorConfigHeader motorConfigHeader,
+            string origenBitacora = AdMotorConfigBitacoraOrigen.Manual)
         {
             motorConfigHeader.PerfilCarga = AdPerfilCargaMotor.Normalizar(motorConfigHeader.PerfilCarga);
 
@@ -84,6 +86,13 @@ namespace Aduax.AuditorDocumentos.Api.Services.DesarrolloDb
                     // Con UseSqlOutputClause(false) configurado en el DbContext, EF Core usará SCOPE_IDENTITY() en lugar de OUTPUT
                     _context.AdMotorConfigHeaders.Add(motorConfigHeader);
                     await _context.SaveChangesAsync();
+
+                    // Bitácora de auditoría: alta del motor (todos los parámetros sin valor anterior)
+                    await RegistrarBitacoraMotorConfigAsync(
+                        motorConfigHeader,
+                        new Dictionary<string, string>(),
+                        motorConfigHeader.CreadoPor,
+                        origenBitacora);
                 }
                 else
                 {
@@ -96,6 +105,9 @@ namespace Aduax.AuditorDocumentos.Api.Services.DesarrolloDb
                     {
                         throw new InvalidOperationException($"No se encontró el registro con Id {motorConfigHeader.Id}");
                     }
+
+                    // Estado previo para la bitácora de auditoría (antes de mutar la entidad rastreada)
+                    var parametrosAnteriores = ConstruirParametrosBitacora(existingHeader);
 
                     // Actualizar propiedades del header
                     existingHeader.IdCliente = motorConfigHeader.IdCliente;
@@ -143,6 +155,12 @@ namespace Aduax.AuditorDocumentos.Api.Services.DesarrolloDb
 
                     await _context.SaveChangesAsync();
 
+                    await RegistrarBitacoraMotorConfigAsync(
+                        existingHeader,
+                        parametrosAnteriores,
+                        existingHeader.ActualizadoPor ?? "Sistema",
+                        origenBitacora);
+
                     // Recargar para obtener los detalles actualizados
                     await _context.Entry(existingHeader).ReloadAsync();
                     await _context.Entry(existingHeader).Collection(h => h.Detalles!).LoadAsync();
@@ -161,6 +179,84 @@ namespace Aduax.AuditorDocumentos.Api.Services.DesarrolloDb
             }
 
             return motorConfigHeader;
+        }
+
+        /// <summary>
+        /// Foto de los parámetros auditables del motor: header y Visible/Obligatorio por campo.
+        /// </summary>
+        private static Dictionary<string, string> ConstruirParametrosBitacora(AdMotorConfigHeader header)
+        {
+            static string SiNo(bool valor) => valor ? "Sí" : "No";
+
+            var parametros = new Dictionary<string, string>
+            {
+                ["IdClasificacion"] = header.IdClasificacion.ToString(),
+                ["AccionPedimento"] = header.AccionPedimento ?? string.Empty,
+                ["PerfilCarga"] = header.PerfilCarga ?? string.Empty,
+                ["Activo"] = SiNo(header.Activo)
+            };
+
+            if (header.Detalles != null)
+            {
+                foreach (var detalle in header.Detalles)
+                {
+                    var nombre = string.IsNullOrWhiteSpace(detalle.NombreCampo)
+                        ? detalle.IdCampo.ToString()
+                        : detalle.NombreCampo;
+                    parametros[$"Campo:{nombre}.Visible"] = SiNo(detalle.Visible);
+                    parametros[$"Campo:{nombre}.Obligatorio"] = SiNo(detalle.Obligatorio);
+                }
+            }
+
+            return parametros;
+        }
+
+        /// <summary>
+        /// Registra una fila por parámetro cuyo valor cambió. Forma parte de la transacción del guardado.
+        /// </summary>
+        private async Task RegistrarBitacoraMotorConfigAsync(
+            AdMotorConfigHeader headerActual,
+            Dictionary<string, string> parametrosAnteriores,
+            string usuario,
+            string origen)
+        {
+            var parametrosNuevos = ConstruirParametrosBitacora(headerActual);
+            var ahora = DateTime.Now;
+            var usuarioBitacora = string.IsNullOrWhiteSpace(usuario) ? "Sistema" : usuario;
+            var filas = new List<AdMotorConfigBitacora>();
+
+            foreach (var parametro in parametrosAnteriores.Keys.Union(parametrosNuevos.Keys))
+            {
+                parametrosAnteriores.TryGetValue(parametro, out var anterior);
+                parametrosNuevos.TryGetValue(parametro, out var nuevo);
+
+                if (string.Equals(anterior, nuevo, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                filas.Add(new AdMotorConfigBitacora
+                {
+                    IdMotorConfigHeader = headerActual.Id,
+                    IdCliente = headerActual.IdCliente,
+                    IdTipoDocumentoVucem = headerActual.IdTipoDocumentoVucem,
+                    Parametro = parametro,
+                    ValorAnterior = anterior,
+                    ValorNuevo = nuevo,
+                    Origen = origen,
+                    MotivoCambio = headerActual.MotivoCambio,
+                    UsuarioCambio = usuarioBitacora,
+                    FechaCambio = ahora
+                });
+            }
+
+            if (filas.Count == 0)
+            {
+                return;
+            }
+
+            _context.AdMotorConfigBitacora.AddRange(filas);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<bool> ExistsMotorConfigHeaderAsync(string idCliente, int idTipoDocumentoVucem)
