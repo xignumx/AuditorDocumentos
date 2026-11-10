@@ -23,8 +23,8 @@ Optimizar el Auditor de Documentos con prelectura OCR asíncrona, clasificación
 | Responsable | Horas SBL | Con código listo | Pendiente | Sin información |
 |-------------|-----------|------------------|-----------|-----------------|
 | Dev 1 | 46 | - | - | 46 [?] |
-| Dev 2 | 46 | 27 | 19 | - |
-| **Total** | **92** | **27** | **19** | **46** |
+| Dev 2 | 46 | 36 | 10 | - |
+| **Total** | **92** | **36** | **10** | **46** |
 
 Las tareas generales del SBL (sección 5) no están incluidas en estas horas.
 
@@ -39,7 +39,7 @@ Las tareas generales del SBL (sección 5) no están incluidas en estas horas.
 | 3 | ID_02 | Interpretación inteligente de tablas y confirmación asistida en 1-clic | Dev 1 | 11 | [?] |
 | 4 | ID_01 | Visualización directa de folio Invoice/Factura/Permiso en repositorio | Dev 1 | 8 | [?] |
 | 5 | ID_01 | Perfil COMPLIANCE y bitácora de auditoría de reglas | Dev 2 | 8 | [~] |
-| 5 | ID_02 | Carga masiva de la matriz de validación (`/config/compliance`) | Dev 2 | 9 | [ ] |
+| 5 | ID_02 | Carga masiva de la matriz de validación (`/config/compliance`) | Dev 2 | 9 | [x] |
 | 5 | ID_03 | Reportes e indicadores (`/reportes`) | Dev 2 | 10 | [ ] |
 
 ## 4. Tareas de desarrollo
@@ -82,10 +82,10 @@ Las tareas generales del SBL (sección 5) no están incluidas en estas horas.
 | E5-ID01 | Filtros de autorización en `MotorConfigController` | 2 | [x] |
 | E5-ID01 | Bitácora de auditoría de cambios en `/config` | 2 | [x] |
 | E5-ID01 | Menú y accesos condicionales por rol en la UI | 2 | [x] |
-| E5-ID02 | SP `csp_Ad_CargaMasivaMatrizConfig` | 2 | [ ] |
-| E5-ID02 | Endpoint `POST /api/MotorConfig/CargaMasivaMatriz` y plantilla Excel | 2 | [ ] |
-| E5-ID02 | Pre-validación y prevención de sobrescritura accidental | 2 | [ ] |
-| E5-ID02 | Pantalla `/config/compliance` | 3 | [ ] |
+| E5-ID02 | Upsert masivo de la matriz (resuelto en servicio, sin SP) | 2 | [x] |
+| E5-ID02 | Endpoint `POST /api/MotorConfig/CargaMasivaMatriz` y plantilla Excel | 2 | [x] |
+| E5-ID02 | Pre-validación y prevención de sobrescritura accidental | 2 | [x] |
+| E5-ID02 | Pantalla `/config/compliance` | 3 | [x] |
 | E5-ID03 | Vistas de BD (`vw_ad_metricas_sistema`) | 2 | [ ] |
 | E5-ID03 | Endpoints `DashboardMetricas` y `ExportarExcel` | 2 | [ ] |
 | E5-ID03 | Lógica de cálculo de KPIs y generación de Excel/CSV | 2 | [ ] |
@@ -143,7 +143,7 @@ Las horas de estas filas no entran en el resumen de la sección 2. El SBL no ind
 | 03 | DesarrolloDB Create ad_ia_diccionario y ad_ia_config_historial | Dev 2 | Escrito, sin ejecutar |
 | 04 | DesarrolloDB Seed ad_ia_diccionario | Dev 2 | Escrito, sin ejecutar |
 | 05 | DesarrolloDB alter ad_ia_ejecucion | Dev 2 | Pendiente |
-| 06 | DesarrolloDB csp_Ad_CargaMasivaMatrizConfig | Dev 2 | Pendiente |
+| 06 | DesarrolloDB csp_Ad_CargaMasivaMatrizConfig | Dev 2 | No se creó: la lógica quedó en el servicio |
 | 07 | DesarrolloDB vw_ad_metricas_sistema | Dev 2 | Pendiente |
 | - | Scripts de Dev 1 (lotes, VUCEM, Aduabook, feedback IA, `csp_Ad_ObtenerDocumentos`) | Dev 1 | [?] |
 
@@ -154,7 +154,7 @@ Orden de ejecución en QA para lo de Dev 2: 01, 03, 04.
 | # | Punto | Responsable | Estado |
 |---|-------|-------------|--------|
 | 1 | Origen del rol COMPLIANCE (catálogo de `IdClase` y alta del rol) | Equipo | Abierto |
-| 2 | Convivencia de defaults por tipo con los motores por cliente | Dev 2 / Analista | Abierto |
+| 2 | Convivencia de defaults por tipo con los motores por cliente | Dev 2 / Analista | Resuelto en la carga masiva (clientes elegidos; celdas vacías no pisan lo existente) |
 | 3 | Nombres de tablas y columnas de Dev 1 para los reportes | Dev 1 / Dev 2 | Abierto |
 | 4 | Reparto de las tareas generales entre desarrolladores | LT | Abierto |
 | 5 | Retirar el usuario `mxochipa` de la validación de Compliance cuando exista el rol | Dev 2 | Abierto |

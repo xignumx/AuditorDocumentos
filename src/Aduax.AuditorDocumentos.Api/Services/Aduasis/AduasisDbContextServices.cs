@@ -119,6 +119,20 @@ namespace Aduax.AuditorDocumentos.Api.Services.Aduasis
                 ?? throw new KeyNotFoundException($"Cliente con Id '{idCliente}' no encontrado.");
         }
 
+        public async Task<List<FCliente>> GetClientesPorIdsAsync(IReadOnlyCollection<string> idsCliente)
+        {
+            var ids = idsCliente.ToList();
+            if (ids.Count == 0)
+            {
+                return new List<FCliente>();
+            }
+
+            return await _context.FCliente
+                .AsNoTracking()
+                .Where(c => c.CveCliente != "0" && ids.Contains(c.IdCliente))
+                .ToListAsync();
+        }
+
         public async Task<string?> ValidaFraccionAsync(string idCliente, string idFraccion)
         {
             var sql = @"

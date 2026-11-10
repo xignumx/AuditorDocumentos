@@ -3,3 +3,4 @@ export { default as DocumentRepositoryListPage } from "./DocumentRepositoryListP
 export { default as DocumentRepositoryCreatePage } from "./DocumentRepositoryCreatePage";
 export { default as NotificationConfigPage } from "./NotificationConfigPage";
 export { default as IaRulesPage } from "./IaRulesPage";
+export { default as ComplianceMatrixPage } from "./ComplianceMatrixPage";

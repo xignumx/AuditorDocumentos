@@ -8,6 +8,7 @@ using Aduax.AuditorDocumentos.Api.Services;
 using Aduax.AuditorDocumentos.Api.Services.Aduasis;
 using Aduax.AuditorDocumentos.Api.Services.DesarrolloDb;
 using Aduax.AuditorDocumentos.Api.Services.EDOCS;
+using Aduax.AuditorDocumentos.Api.Services.MotorConfigMasiva;
 using Aduax.AuditorDocumentos.VModels;
 
 namespace Aduax.AuditorDocumentos.Api.Controllers
@@ -22,6 +23,7 @@ namespace Aduax.AuditorDocumentos.Api.Controllers
         private readonly IDesarrolloDb_DbContextServices _desarrolloDbService;
         private readonly IConfigAutorizacionService _configAutorizacionService;
         private readonly IIaReglasDbContextServices _iaReglasDbService;
+        private readonly IMotorConfigMasivaService _motorConfigMasivaService;
 
         private const string MensajeConfigDenegada =
             "Su perfil no tiene permiso para modificar la configuración del motor.";
@@ -31,13 +33,15 @@ namespace Aduax.AuditorDocumentos.Api.Controllers
             IAduasisDbContextServices aduasisService,
             IDesarrolloDb_DbContextServices desarrolloDbService,
             IConfigAutorizacionService configAutorizacionService,
-            IIaReglasDbContextServices iaReglasDbService)
+            IIaReglasDbContextServices iaReglasDbService,
+            IMotorConfigMasivaService motorConfigMasivaService)
         {
             _edocsService = edocsService;
             _aduasisService = aduasisService;
             _desarrolloDbService = desarrolloDbService;
             _configAutorizacionService = configAutorizacionService;
             _iaReglasDbService = iaReglasDbService;
+            _motorConfigMasivaService = motorConfigMasivaService;
         }
 
         [HttpPost("ObtenerDocumentosVucem")]

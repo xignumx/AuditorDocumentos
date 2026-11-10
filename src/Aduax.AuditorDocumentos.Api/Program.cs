@@ -10,6 +10,7 @@ using Aduax.AuditorDocumentos.Api.Services.DesarrolloDb;
 using Aduax.AuditorDocumentos.Api.Services.EDOCS;
 using Aduax.AuditorDocumentos.Api.Services.FileStorage;
 using Aduax.AuditorDocumentos.Api.Services.IaReglas;
+using Aduax.AuditorDocumentos.Api.Services.MotorConfigMasiva;
 using Aduax.AuditorDocumentos.Api.Services.Vucem;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -102,6 +103,7 @@ builder.Services.AddScoped<IEDOCS_DbContextServices, EDOCS_DbContextServices>();
 builder.Services.AddScoped<IConfigAutorizacionService, ConfigAutorizacionService>();
 builder.Services.AddScoped<IIaReglasDbContextServices, IaReglasDbContextServices>();
 builder.Services.AddScoped<IIaReglasService, IaReglasService>();
+builder.Services.AddScoped<IMotorConfigMasivaService, MotorConfigMasivaService>();
 builder.Services.AddScoped<SendMailServices>();
 builder.Services.AddScoped<INotificacionVencimientoProcessor, NotificacionVencimientoProcessor>();
 

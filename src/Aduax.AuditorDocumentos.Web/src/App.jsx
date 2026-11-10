@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import {
+  ComplianceMatrixPage,
   ConfigurationsPage,
   DocumentRepositoryListPage,
   DocumentRepositoryCreatePage,
@@ -40,6 +41,17 @@ function AppRoutes({ selectedClient, permissions }) {
             loaded={permissions.loaded}
           >
             <IaRulesPage />
+          </RequirePermission>
+        }
+      />
+      <Route
+        path="/config/compliance"
+        element={
+          <RequirePermission
+            allowed={permissions.canAccessCompliance}
+            loaded={permissions.loaded}
+          >
+            <ComplianceMatrixPage />
           </RequirePermission>
         }
       />

@@ -50,6 +50,32 @@ import { request } from "./httpClient";
  * @property {string} fecha
  */
 /**
+ * @typedef {Object} CargaMasivaMatrizItem
+ * @property {string} idCliente
+ * @property {string} [razonSocial]
+ * @property {number} idTipoDocumentoVucem
+ * @property {string} [documento]
+ * @property {"NUEVO"|"MODIFICA"|"SIN_CAMBIOS"|"ERROR"} estado
+ * @property {boolean} aplicado
+ * @property {string} [mensaje]
+ * @property {number} totalCambios
+ * @property {string[]} cambios
+ */
+/**
+ * @typedef {Object} CargaMasivaMatrizResultado
+ * @property {boolean} soloPrevisualizar
+ * @property {number} totalClientes
+ * @property {number} totalFilasArchivo
+ * @property {number} totalNuevos
+ * @property {number} totalModifica
+ * @property {number} totalSinCambios
+ * @property {number} totalErrores
+ * @property {number} totalAplicados
+ * @property {string[]} erroresArchivo
+ * @property {string[]} avisos
+ * @property {CargaMasivaMatrizItem[]} items
+ */
+/**
  * @typedef {Object} UnidadMedida
  * @property {string} idUnidadUniversal
  * @property {string|null} descripcion
@@ -425,6 +451,31 @@ export const motorConfigService = {
     return request("/api/MotorConfig/ObtenerUnidadesMedida", {
       method: "POST",
       body: JSON.stringify(payload),
+      token,
+    });
+  },
+  /**
+   * Plantilla .xlsx de la matriz con todos los tipos VUCEM activos (solo Compliance).
+   * @param {string} [token]
+   * @returns {Promise<import("../models/api").ApiResponseData<{ nombreArchivo: string, contenidoBase64: string }>>}
+   */
+  async descargarPlantillaMatriz(token) {
+    return request("/api/MotorConfig/DescargarPlantillaMatriz", {
+      method: "POST",
+      body: JSON.stringify({}),
+      token,
+    });
+  },
+  /**
+   * Previsualiza (soloPrevisualizar = true) o aplica la carga masiva de la matriz a los clientes indicados.
+   * @param {{ nombreArchivo: string, archivoBase64: string, idsClientes: string[], soloPrevisualizar: boolean, motivoCambio?: string }} data
+   * @param {string} [token]
+   * @returns {Promise<import("../models/api").ApiResponseData<CargaMasivaMatrizResultado>>}
+   */
+  async cargaMasivaMatriz(data, token) {
+    return request("/api/MotorConfig/CargaMasivaMatriz", {
+      method: "POST",
+      body: JSON.stringify({ data }),
       token,
     });
   },

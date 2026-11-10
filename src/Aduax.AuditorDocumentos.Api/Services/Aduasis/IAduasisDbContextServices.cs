@@ -10,6 +10,7 @@ namespace Aduax.AuditorDocumentos.Api.Services.Aduasis
         Task<(List<FAduana> Data, int TotalRecords)> GetAduanasAsync(string? filter, int page, int size);
         Task<(List<FRegimen> Data, int TotalRecords)> GetRegimenesAsync(string? filter, int page, int size, string? cveTipoOperacion);
         Task<FCliente> GetClienteAsync(string idCliente);
+        Task<List<FCliente>> GetClientesPorIdsAsync(IReadOnlyCollection<string> idsCliente);
         Task<string?> ValidaFraccionAsync(string idCliente, string idFraccion);
         Task<string?> ValidaUnidadMedidaAsync(string unidadMedida);
         Task<(List<UnidadMedidaDto> Data, int TotalRecords)> GetUnidadesMedidaAsync(string? filter, int page, int size);

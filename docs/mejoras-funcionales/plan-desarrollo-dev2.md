@@ -19,9 +19,9 @@ Vista de todo el proyecto: [plan-general-desarrollo.md](./plan-general-desarroll
 |--------|---------------|-----------|--------|
 | E5-ID01 | Perfil COMPLIANCE y bitácora de auditoría de reglas | 8 | [~] Código listo; falta el alta del rol COMPLIANCE |
 | E3-ID01 | Prompts y diccionario de sinónimos ES/EN (`/config/ia-rules`) | 19 | [x] Código listo |
-| E5-ID02 | Carga masiva de la matriz de validación | 9 | [ ] Pendiente |
+| E5-ID02 | Carga masiva de la matriz de validación | 9 | [x] Código listo (sin SP; ver notas del bloque) |
 | E5-ID03 | Reportes e indicadores (`/reportes`) | 10 | [ ] Pendiente |
-| **Total** | | **46** | **27 h con código listo (59 %), 19 h pendientes** |
+| **Total** | | **46** | **36 h con código listo (78 %), 10 h pendientes** |
 
 Pendientes transversales de lo ya construido:
 - Ejecutar en QA los scripts `01`, `03` y `04` (están en `docs/mejoras-funcionales/SQL/implementacion/`).
@@ -44,8 +44,8 @@ Pendientes transversales de lo ya construido:
 
 1. E5-ID01 (COMPLIANCE y bitácora). Base de permisos y bitácora. **Hecho (parcial).**
 2. E3-ID01 (ia-rules y diccionario). **Hecho.**
-3. E5-ID02 (carga masiva de matriz). **Siguiente.**
-4. E5-ID03 (reportes). Depende de datos de Dev 1.
+3. E5-ID02 (carga masiva de matriz). **Hecho.**
+4. E5-ID03 (reportes). Depende de datos de Dev 1. **Siguiente.**
 
 ## 4. Tareas por bloque
 
@@ -82,12 +82,25 @@ Alcance no incluido (decidido al implementar):
 
 | # | Tarea | Horas | Estado | Entregable |
 |---|-------|-------|--------|------------|
-| 1 | SP `csp_Ad_CargaMasivaMatrizConfig` | 2 | [ ] | Upsert masivo de visibilidad, obligatoriedad, clasificación y acción de pedimento para los clientes seleccionados. Respeta `ValidateMotorConfigDetalles` y el bloqueo de cambio de clasificación con documentos activos. |
-| 2 | Endpoint `POST /api/MotorConfig/CargaMasivaMatriz` | 2 | [ ] | Recibe archivo y lista de clientes, parsea con ClosedXML. Incluye la descarga de la plantilla `.xlsx`. |
-| 3 | Pre-validación | 2 | [ ] | Estructura del archivo, existencia de tipos VUCEM y campos, conflictos con configuraciones existentes. Modo solo previsualizar antes de aplicar. Escribe en la bitácora con origen MASIVA. |
-| 4 | Pantalla `/config/compliance` | 3 | [ ] | Selector de clientes (checkboxes y buscador por razón social), descarga de plantilla, subida, vista previa por cliente (nuevo vs modifica) y confirmación. |
+| 1 | Upsert masivo (SBL: SP `csp_Ad_CargaMasivaMatrizConfig`) | 2 | [x] | **Sin SP**: `MotorConfigMasivaService` aplica cada combinación cliente + tipo con el mismo guardado y la misma bitácora que `/config` (origen MASIVA). Reglas compartidas en `MotorConfigReglas`. Ver "Desviación del SBL". |
+| 2 | Endpoint `POST /api/MotorConfig/CargaMasivaMatriz` | 2 | [x] | `DescargarPlantillaMatriz` y `CargaMasivaMatriz` en `MotorConfigController.MatrizMasiva.cs`. Archivo en base64 dentro del JSON. Parseo y plantilla con ClosedXML (`MatrizConfigExcel`). |
+| 3 | Pre-validación | 2 | [x] | Estructura del archivo, valores, tipos VUCEM y clientes existentes, límites. Vista previa sin guardar (`SoloPrevisualizar`). Un archivo con errores nunca se aplica. |
+| 4 | Pantalla `/config/compliance` | 3 | [x] | Selector de clientes con checkboxes y buscador, descarga de plantilla, subida de `.xlsx`, vista previa por cliente y confirmación antes de aplicar. Ítem "Compliance" en el menú. |
 
-Reglas propuestas contra sobrescritura accidental: las celdas vacías no pisan valores existentes y la vista previa marca "nuevo" vs "modifica".
+Reglas contra sobrescritura accidental (implementadas):
+- Las celdas vacías no modifican la configuración actual; las filas sin ningún valor se omiten.
+- Visible = NO apaga también Obligatorio; Obligatorio = SI exige Visible.
+- La clasificación no cambia si hay documentos Pendientes, Aprobados, Vinculados o Digitalizados (esa combinación queda con error y el resto continúa).
+- No se modifica el perfil para acciones críticas (los motores nuevos nacen con "G").
+- Se exige vista previa antes de aplicar (la pantalla bloquea el botón) y se muestra una confirmación con los totales.
+
+Formato del archivo: hoja "Matriz", una fila por tipo VUCEM (plantilla prellenada con los tipos activos), columnas `Clasificacion`, `AccionPedimento` y `{Campo} Visible` / `{Campo} Obligatorio` para los campos 3 a 24. Hoja "Instrucciones" con las reglas.
+
+Límites: archivo de 5 MB, 1000 filas, 200 clientes y 1000 combinaciones (clientes x filas) por carga.
+
+Desviación del SBL: el SBL pedía el SP `csp_Ad_CargaMasivaMatrizConfig`. Se resolvió en el servicio para no duplicar en SQL las validaciones, el bloqueo de clasificación ni la bitácora, y para poder probar la lógica completa. A cambio, cada combinación es un guardado individual (con el tope de 1000 por carga). Si el volumen real lo exige, se puede agregar el SP después. Por eso no hay script SQL `06`.
+
+Prueba realizada: servicio completo con base en memoria y servicios simulados (vista previa sin escritura, alta y modificación, bitácora MASIVA, idempotencia, bloqueo de clasificación, motor inválido, tipo y cliente inexistentes). No se probó contra SQL Server ni en navegador.
 
 ### E5-ID03: Reportes (10 h)
 
@@ -111,7 +124,7 @@ Los scripts se escriben como archivos y no se ejecutan contra la base. Carpeta: 
 | 03 | DesarrolloDB Create ad_ia_diccionario y ad_ia_config_historial | DesarrolloDB | Escrito, sin ejecutar |
 | 04 | DesarrolloDB Seed ad_ia_diccionario | DesarrolloDB | Escrito, sin ejecutar |
 | 05 | DesarrolloDB alter ad_ia_ejecucion | DesarrolloDB | Pendiente (E5-ID03) |
-| 06 | DesarrolloDB csp_Ad_CargaMasivaMatrizConfig | DesarrolloDB | Pendiente (E5-ID02) |
+| 06 | DesarrolloDB csp_Ad_CargaMasivaMatrizConfig | DesarrolloDB | No se creó: la lógica quedó en el servicio (ver E5-ID02) |
 | 07 | DesarrolloDB vw_ad_metricas_sistema | DesarrolloDB | Pendiente (E5-ID03) |
 
 Orden de ejecución en QA: 01, 03, 04. El 02 depende de resolver el punto abierto 1.
@@ -121,13 +134,16 @@ Orden de ejecución en QA: 01, 03, 04. El 02 depende de resolver el punto abiert
 **API**
 - Nuevos: `Controllers/MotorConfigController.IaReglas.cs`, `Data/DesarrolloDB/AdMotorConfigBitacora.cs`, `AdIaDiccionario.cs`, `AdIaConfigHistorial.cs`, `Services/ConfigAutorizacionService.cs`, `Services/DesarrolloDb/IIaReglasDbContextServices.cs`, `IaReglasDbContextServices.cs`, `Services/IaReglas/IaReglasMotor.cs`, `IaReglasService.cs`.
 - Modificados: `MotorConfigController.cs` (clase `partial`, autorización y nuevo `ValidaUsuarioCompliance`), `DocumentosController.cs` (dos llamadas en `ExtraDatosDocumentoIa` y un parámetro en el constructor), `DesarrolloDb_DbContextServices.cs` (bitácora de config), `AduasisDbContextServices.cs` (catálogo de UM), `DesarrolloDB_DBContext.cs`, `Program.cs`.
+- E5-ID02, nuevos: `Controllers/MotorConfigController.MatrizMasiva.cs`, `Services/MotorConfigMasiva/MatrizConfigExcel.cs`, `MotorConfigMasivaService.cs`, `Services/DesarrolloDb/MotorConfigReglas.cs`.
+- E5-ID02, modificados: `Aduax.AuditorDocumentos.Api.csproj` (ClosedXML 0.104.2, la misma versión que ya llegaba como dependencia indirecta), `MotorConfigController.cs` (constructor), `DesarrolloDb_DbContextServices.cs` (usa `MotorConfigReglas`; nuevo `LimpiarSeguimientoCambios`), `AduasisDbContextServices.cs` (`GetClientesPorIdsAsync`), `Program.cs`.
 
 **VModels**
-- Nuevos: `AdRolesConfiguracion.cs`, `IaReglasModels.cs`.
+- Nuevos: `AdRolesConfiguracion.cs`, `IaReglasModels.cs`, `CargaMasivaMatrizModels.cs`.
 
 **Web**
 - Nuevos: `pages/IaRulesPage.jsx` y `.css`, `components/iaRules/` (tres pestañas), `components/RequirePermission.jsx`, `hooks/useConfigPermissions.js`, `constants/iaRules.js`.
-- Modificados: `App.jsx`, `AppHeader.jsx`, `components/index.js`, `pages/index.js`, `services/motorConfigService.js`.
+- E5-ID02, nuevos: `pages/ComplianceMatrixPage.jsx` y `.css`, `components/complianceMatrix/` (`ClientMultiSelector`, `MatrixResult`).
+- Modificados: `App.jsx`, `AppHeader.jsx` (ítems "Reglas IA" y "Compliance"), `components/index.js`, `pages/index.js`, `services/motorConfigService.js`.
 
 ## 7. Fórmulas de KPI (aprobadas)
 
@@ -142,7 +158,7 @@ Orden de ejecución en QA: 01, 03, 04. El 02 depende de resolver el punto abiert
 | # | Punto | Estado |
 |---|-------|--------|
 | 1 | Origen del rol COMPLIANCE: catálogo de `IdClase` y quién da de alta el rol. | Abierto (lo investiga el equipo) |
-| 2 | Convivencia entre los defaults por tipo de documento y los motores ya configurados por cliente. | Abierto (afecta E5-ID02) |
+| 2 | Convivencia entre los defaults por tipo de documento y los motores ya configurados por cliente. | Resuelto en la carga masiva: se aplica a los clientes elegidos y las celdas vacías no pisan lo existente. Una configuración "por tipo para todos los clientes" no se implementó. |
 | 3 | Nombres de tablas y columnas de Dev 1 que alimentan los reportes (`ad_ia_feedback`, lotes VUCEM, `ad_lote_carga`). | Abierto (afecta E5-ID03) |
 | 4 | Reparto de las tareas generales del SBL entre Dev 1 y Dev 2. | Abierto |
 | 5 | Filtro de autorización global en `Program.cs`. | Cerrado: no hay; cada controlador usa `[Authorize]` y el middleware de token. |

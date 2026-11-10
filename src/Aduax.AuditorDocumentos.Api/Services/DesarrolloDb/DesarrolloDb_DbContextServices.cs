@@ -44,16 +44,7 @@ namespace Aduax.AuditorDocumentos.Api.Services.DesarrolloDb
                 // Crear detalle para cada campo del enum AdCampos
                 foreach (AdCampos campo in Enum.GetValues(typeof(AdCampos)))
                 {
-                    string nombreCampo = Enum.GetName(typeof(AdCampos), campo) ?? campo.ToString();
-                    bool esCampoNuevo072026 = campo is AdCampos.Factura or AdCampos.FechaFactura or AdCampos.ValorUsd
-                        or AdCampos.GuiaBl or AdCampos.Pedimento;
-                    configHeader.Detalles.Add(new AdMotorConfigDetalle
-                    {
-                        IdCampo = (int)campo,
-                        NombreCampo = nombreCampo,
-                        Visible = !esCampoNuevo072026,
-                        Obligatorio = campo == AdCampos.VigenciaHasta
-                    });
+                    configHeader.Detalles.Add(MotorConfigReglas.CrearDetalleDefault(campo));
                 }
             }
             
@@ -67,7 +58,7 @@ namespace Aduax.AuditorDocumentos.Api.Services.DesarrolloDb
             motorConfigHeader.PerfilCarga = AdPerfilCargaMotor.Normalizar(motorConfigHeader.PerfilCarga);
 
             // Validar detalles antes de guardar
-            ValidateMotorConfigDetalles(motorConfigHeader.Detalles);
+            MotorConfigReglas.ValidarDetalles(motorConfigHeader.Detalles);
 
             // Usar transacción para agrupar todas las operaciones y evitar problemas con triggers
             using var transaction = await _context.Database.BeginTransactionAsync();
@@ -107,7 +98,7 @@ namespace Aduax.AuditorDocumentos.Api.Services.DesarrolloDb
                     }
 
                     // Estado previo para la bitácora de auditoría (antes de mutar la entidad rastreada)
-                    var parametrosAnteriores = ConstruirParametrosBitacora(existingHeader);
+                    var parametrosAnteriores = MotorConfigReglas.ConstruirParametros(existingHeader);
 
                     // Actualizar propiedades del header
                     existingHeader.IdCliente = motorConfigHeader.IdCliente;
@@ -182,36 +173,6 @@ namespace Aduax.AuditorDocumentos.Api.Services.DesarrolloDb
         }
 
         /// <summary>
-        /// Foto de los parámetros auditables del motor: header y Visible/Obligatorio por campo.
-        /// </summary>
-        private static Dictionary<string, string> ConstruirParametrosBitacora(AdMotorConfigHeader header)
-        {
-            static string SiNo(bool valor) => valor ? "Sí" : "No";
-
-            var parametros = new Dictionary<string, string>
-            {
-                ["IdClasificacion"] = header.IdClasificacion.ToString(),
-                ["AccionPedimento"] = header.AccionPedimento ?? string.Empty,
-                ["PerfilCarga"] = header.PerfilCarga ?? string.Empty,
-                ["Activo"] = SiNo(header.Activo)
-            };
-
-            if (header.Detalles != null)
-            {
-                foreach (var detalle in header.Detalles)
-                {
-                    var nombre = string.IsNullOrWhiteSpace(detalle.NombreCampo)
-                        ? detalle.IdCampo.ToString()
-                        : detalle.NombreCampo;
-                    parametros[$"Campo:{nombre}.Visible"] = SiNo(detalle.Visible);
-                    parametros[$"Campo:{nombre}.Obligatorio"] = SiNo(detalle.Obligatorio);
-                }
-            }
-
-            return parametros;
-        }
-
-        /// <summary>
         /// Registra una fila por parámetro cuyo valor cambió. Forma parte de la transacción del guardado.
         /// </summary>
         private async Task RegistrarBitacoraMotorConfigAsync(
@@ -220,7 +181,7 @@ namespace Aduax.AuditorDocumentos.Api.Services.DesarrolloDb
             string usuario,
             string origen)
         {
-            var parametrosNuevos = ConstruirParametrosBitacora(headerActual);
+            var parametrosNuevos = MotorConfigReglas.ConstruirParametros(headerActual);
             var ahora = DateTime.Now;
             var usuarioBitacora = string.IsNullOrWhiteSpace(usuario) ? "Sistema" : usuario;
             var filas = new List<AdMotorConfigBitacora>();
@@ -257,6 +218,11 @@ namespace Aduax.AuditorDocumentos.Api.Services.DesarrolloDb
 
             _context.AdMotorConfigBitacora.AddRange(filas);
             await _context.SaveChangesAsync();
+        }
+
+        public void LimpiarSeguimientoCambios()
+        {
+            _context.ChangeTracker.Clear();
         }
 
         public async Task<bool> ExistsMotorConfigHeaderAsync(string idCliente, int idTipoDocumentoVucem)
@@ -769,34 +735,6 @@ namespace Aduax.AuditorDocumentos.Api.Services.DesarrolloDb
 
             await _context.SaveChangesAsync();
             return aprobacionExistente;
-        }
-
-        private void ValidateMotorConfigDetalles(ICollection<AdMotorConfigDetalle>? detalles)
-        {
-            if (detalles == null || !detalles.Any())
-            {
-                throw new InvalidOperationException("Debe existir al menos un detalle en la configuración");
-            }
-
-            // Validación 1: Al menos 1 campo diferente de 1, 2 y 3 (IdCliente, RfcCliente, TipoPedimento) debe ser visible
-            bool tieneCampoVisibleDiferente = detalles.Any(d => 
-                d.Visible && 
-                d.IdCampo != (int)AdCampos.IdCliente && 
-                d.IdCampo != (int)AdCampos.RfcCliente && 
-                d.IdCampo != (int)AdCampos.TipoPedimento);
-
-            if (!tieneCampoVisibleDiferente)
-            {
-                throw new InvalidOperationException("Debe existir al menos un campo visible diferente de TipoPedimento");
-            }
-
-            // Validación 2: De todos los campos visibles, al menos 1 debe ser obligatorio
-            bool tieneCampoVisibleObligatorio = detalles.Any(d => d.Visible && d.Obligatorio);
-
-            if (!tieneCampoVisibleObligatorio)
-            {
-                throw new InvalidOperationException("Al menos uno de los campos visibles debe ser obligatorio");
-            }
         }
 
         public async Task<List<CspAdDocumentosPorEstatus>> GetDocumentosPorEstatusAsync(string idCliente, int idEstatus)
